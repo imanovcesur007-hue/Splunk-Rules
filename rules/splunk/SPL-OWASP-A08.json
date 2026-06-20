@@ -1,0 +1,8 @@
+{
+  "rule_id": "SPL-OWASP-A08",
+  "rule_name": "Java Deserialization Payload Detection",
+  "description": "Scans raw web application payloads and parameters for common base64 or hex serialized magic strings indicating untrusted deserialization vectors.",
+  "severity": "Critical",
+  "owasp_category": "A08:2021-Software and Data Integrity Failures",
+  "search_query": "index=web sourcetype=tomcat_access | regex _raw=\"(rO0ABX|rO0ABQ|aced0005)\" | stats count by src_ip, uri"
+}
