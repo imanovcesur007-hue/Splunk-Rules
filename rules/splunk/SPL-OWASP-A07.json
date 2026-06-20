@@ -1,0 +1,8 @@
+{
+  "rule_id": "SPL-OWASP-A07",
+  "rule_name": "High-Volume Credential Spraying Attack",
+  "description": "Detects password spraying behavior where a single source IP triggers authentication failures across multiple distinct usernames within a short window.",
+  "severity": "High",
+  "owasp_category": "A07:2021-Identification and Authentication Failures",
+  "search_query": "index=auth sourcetype=linux_secure action=failure | stats dc(user) as targeted_users count as total_failures by src_ip | where targeted_users > 5 AND total_failures > 20"
+}
