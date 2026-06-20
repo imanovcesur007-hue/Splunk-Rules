@@ -7,7 +7,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- SPLUNK KONFİQURASİYASI ---
-SPLUNK_HOST = "104.197.65.227:8089" 
+SPLUNK_HOST = "https://104.197.65.227:8089" 
 SPLUNK_TOKEN = "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIjoiSFM1MTIiLCJ2ZXIiOiJ2MiIsInR0eXAiOiJzdGF0aWMifQ.eyJpc3MiOiJtaWxsaXNlYyBmcm9tIHNwbHVua21haW5zZXJ2ZXIiLCJzdWIiOiJtaWxsaXNlYyIsImF1ZCI6IkdpdEh1YiBBUEkgU2tyaXB0aSIsImlkcCI6IlNwbHVuayIsImp0aSI6IjNkMzg4MTQ4OWEyNGY4NWM0MzIxNTUzNmVjODdkMDFhNTRmNzIyMTkwM2I4NjJmNjFjYjdiN2ZhMTgzYzdiMzQiLCJpYXQiOjE3ODE4ODcyODIsImV4cCI6MTc4NDQ3OTI4MiwibmJyIjoxNzgxODg3MjgyfQ.Yof2XsuxIWXLAPqJlW4XJ2FAYucNfRux-OzGqLei3BXcLb8LTpUnE5pAu5Kq5Ech5E7__phR7xp7TQD3M9O1aQ"
 APP_CONTEXT = "search" 
 API_ENDPOINT = f"{SPLUNK_HOST}/servicesNS/nobody/{APP_CONTEXT}/saved/searches"
