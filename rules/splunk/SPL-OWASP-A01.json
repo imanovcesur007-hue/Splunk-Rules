@@ -4,5 +4,5 @@
   "description": "Detects a single source IP enumerating an abnormally high number of unique user profile paths within a short timeframe, indicating broken access control.",
   "severity": "High",
   "owasp_category": "A01:2021-Broken Access Control",
-  "search_query": "index=web sourcetype=access_combined uri_path=\"/api/users/*\" | stats dc(uri_path) as distinct_profiles values(uri_path) as accessed_profiles by src_ip | where distinct_profiles > 20"
+  "search_query": "index=main sourcetype=_json uri_path=\"/api/users/*\" | stats dc(uri_path) as distinct_profiles values(uri_path) as accessed_profiles by src_ip | where distinct_profiles > 20"
 }
