@@ -4,5 +4,5 @@
   "description": "Detects classic and advanced SQL injection payloads inside URI queries or web application request strings using strict regex patterns.",
   "severity": "Critical",
   "owasp_category": "A03:2021-Injection",
-  "search_query": "index=main sourcetype=_json | regex _raw=\"(?i)(UNION\\s+SELECT|SELECT\\s+.*\\s+FROM|'--|OR\\s+\\d+=\\d+)\" | stats count by src_ip, uri, status"
+  "search_query": "index=main sourcetype=_json | regex _raw=\"(?i)(UNION\\s+SELECT|SELECT\\s+.*\\s+FROM|'--|OR\\s+\\d+=\\d+)\" | stats count by src_ip, uri, status_code"
 }
