@@ -15,7 +15,6 @@ API_ENDPOINT = f"{SPLUNK_HOST}/servicesNS/nobody/{APP_CONTEXT}/saved/searches"
 # --- TELEGRAM KONFİQURASİYASI ---
 TELEGRAM_BOT_TOKEN = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
 TELEGRAM_CHAT_ID = "-1004353279755"
-TELEGRAM_WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
 
 headers = {
     "Authorization": f"Bearer {SPLUNK_TOKEN}",
@@ -27,29 +26,27 @@ RULES_DIR = "rules/splunk/"
 def deploy_rule_to_splunk(rule_data):
     rule_name = rule_data["rule_name"]
     
-    # Telegram-a gedəcək xüsusi mesajın formatı
-    telegram_message = f"🚨 *SOC ALERT: YENİ TƏHDİD AŞKARLANDI!* 🚨\n\n*Qayda:* {rule_name}\n*Kateqoriya:* {rule_data['owasp_category']}\n*Ciddiyyət:* {rule_data['severity']}\n*Detal:* {rule_data['description']}\n\n🕵️‍♂️ Təcili Splunk panelinə daxil olub analiz edin!"
+    # 1. Telegram-a gedəcək xüsusi mesajı yaradırıq
+    telegram_message = f"🚨 SOC ALERT: YENİ TƏHDİD AŞKARLANDI! 🚨\n\nQayda: {rule_name}\nKateqoriya: {rule_data['owasp_category']}\nCiddiyyət: {rule_data['severity']}\n\nTəcili Splunk panelinə daxil olub analiz edin!"
+    
+    # 2. Splunk JSON problemini aşmaq üçün mesajı birbaşa URL-in içinə URL-encoded formatda yerləşdiririk
+    encoded_message = urllib.parse.quote(telegram_message)
+    TELEGRAM_WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={encoded_message}"
     
     payload = {
         "search": rule_data["search_query"],
         "description": f"{rule_data['description']} | OWASP Category: {rule_data['owasp_category']} | Severity: {rule_data['severity']}",
         "disabled": "0",
         "is_scheduled": "1",
-        
-        # --- DƏYİŞİKLİK BURADADIR: Hər 1 dəqiqədən bir yoxlayacaq ---
         "cron_schedule": "* * * * *", 
-        
         "alert_type": "number of events",
         "alert_comparator": "greater than",
         "alert_threshold": "0",
-        "action.webhook.param.owasp_category": rule_data["owasp_category"],
         
-        # --- SPLUNK WEBHOOK (TELEGRAM) İNTEQRASİYASI ---
+        # --- SPLUNK WEBHOOK URL YENİLƏNMƏSİ ---
         "actions": "webhook",
         "action.webhook": "1",
-        "action.webhook.param.url": TELEGRAM_WEBHOOK_URL,
-        "action.webhook.param.payload_format": "json",
-        "action.webhook.param.payload": f'{{"chat_id": "{TELEGRAM_CHAT_ID}", "text": "{telegram_message}", "parse_mode": "Markdown"}}'
+        "action.webhook.param.url": TELEGRAM_WEBHOOK_URL
     }
 
     print(f"Emal edilir: {rule_data['rule_id']} - {rule_name}...")
@@ -62,7 +59,7 @@ def deploy_rule_to_splunk(rule_data):
     if response.status_code == 201:
         print(f"✅ YARADILDI: '{rule_name}' (Telegram Alert ilə).\n")
     elif response.status_code == 409:
-        print(f"⚠️ Qayda mövcuddur. Güncəlləmə (1 dəqiqəlik interval + Telegram Alert əlavə edilir)...")
+        print(f"⚠️ Qayda mövcuddur. Güncəlləmə (URL Alert həlli tətbiq edilir)...")
         
         encoded_rule_name = urllib.parse.quote(rule_name)
         update_endpoint = f"{API_ENDPOINT}/{encoded_rule_name}"
