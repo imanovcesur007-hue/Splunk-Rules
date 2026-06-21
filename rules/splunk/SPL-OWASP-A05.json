@@ -4,5 +4,5 @@
   "description": "Monitors successful HTTP 200 responses to known backend configurations and administrative panels originating from external, non-whitelisted IP addresses.",
   "severity": "High",
   "owasp_category": "A05:2021-Security Misconfiguration",
-  "search_query": "index=web sourcetype=apache_access status=200 uri_path IN (\"/admin\", \"/config\", \"/actuator/env\", \"/phpmyadmin\") | where NOT cidrmatch(\"10.0.0.0/8\", src_ip) AND NOT cidrmatch(\"192.168.0.0/16\", src_ip)"
+  "search_query": "index=main sourcetype=_json status=200 uri_path IN (\"/admin\", \"/config\", \"/actuator/env\", \"/phpmyadmin\") | where NOT cidrmatch(\"10.0.0.0/8\", src_ip) AND NOT cidrmatch(\"192.168.0.0/16\", src_ip)"
 }
