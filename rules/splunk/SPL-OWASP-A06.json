@@ -4,5 +4,5 @@
   "description": "Detects potential exploitation attempts of vulnerable components targeting Log4Shell vulnerabilities via specialized JNDI lookup patterns in headers.",
   "severity": "Critical",
   "owasp_category": "A06:2021-Vulnerable and Outdated Components",
-  "search_query": "index=web sourcetype=access_combined | regex _raw=\"\\$\\{jndi:(ldap|rmi|ldaps|dns):.*}\" | stats count by src_ip, dest_ip, user_agent"
+  "search_query": "index=main sourcetype=_json | regex _raw=\"\\$\\{jndi:(ldap|rmi|ldaps|dns):.*}\" | stats count by src_ip, dest_ip, user_agent"
 }
