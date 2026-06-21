@@ -35,7 +35,10 @@ def deploy_rule_to_splunk(rule_data):
         "description": f"{rule_data['description']} | OWASP Category: {rule_data['owasp_category']} | Severity: {rule_data['severity']}",
         "disabled": "0",
         "is_scheduled": "1",
-        "cron_schedule": "*/15 * * * *",
+        
+        # --- DƏYİŞİKLİK BURADADIR: Hər 1 dəqiqədən bir yoxlayacaq ---
+        "cron_schedule": "* * * * *", 
+        
         "alert_type": "number of events",
         "alert_comparator": "greater than",
         "alert_threshold": "0",
@@ -59,7 +62,7 @@ def deploy_rule_to_splunk(rule_data):
     if response.status_code == 201:
         print(f"✅ YARADILDI: '{rule_name}' (Telegram Alert ilə).\n")
     elif response.status_code == 409:
-        print(f"⚠️ Qayda mövcuddur. Güncəlləmə (Telegram Alert əlavə edilir)...")
+        print(f"⚠️ Qayda mövcuddur. Güncəlləmə (1 dəqiqəlik interval + Telegram Alert əlavə edilir)...")
         
         encoded_rule_name = urllib.parse.quote(rule_name)
         update_endpoint = f"{API_ENDPOINT}/{encoded_rule_name}"
