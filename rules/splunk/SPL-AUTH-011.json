@@ -1,0 +1,8 @@
+{
+  "rule_id": "SPL-AUTH-011",
+  "rule_name": "Targeted Account Brute Force Detection",
+  "description": "Detects 5 or more failed login attempts targeting a single user account from the same IP address, indicating an active brute-force attack.",
+  "severity": "High",
+  "owasp_category": "Authentication/Brute Force",
+  "search_query": "index=main sourcetype=_json action=login_failed | stats count by src_ip, user | where count >= 5"
+}
