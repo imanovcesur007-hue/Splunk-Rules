@@ -4,5 +4,5 @@
   "description": "Detects the explicit clearing of security or system event logs by privileged accounts, which indicates an attempt to blind security monitoring systems.",
   "severity": "Critical",
   "owasp_category": "A09:2021-Security Logging and Monitoring Failures",
-  "search_query": "index=windows (EventCode=1102 OR (EventCode=104 SourceName=\"Microsoft-Windows-Eventlog\")) | stats count by ComputerName, User"
+  "search_query": "index=main sourcetype=_json (EventCode=1102 OR (EventCode=104 SourceName=\"Microsoft-Windows-Eventlog\")) | stats count by ComputerName, User"
 }
