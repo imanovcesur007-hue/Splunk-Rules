@@ -6,12 +6,13 @@ import urllib.parse
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# --- SPLUNK KONFİQURASİYASI ---
-SPLUNK_HOST = "https://104.197.65.227:8089" 
-SPLUNK_TOKEN = "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIjoiSFM1MTIiLCJ2ZXIiOiJ2MiIsInR0eXAiOiJzdGF0aWMifQ.eyJpc3MiOiJtaWxsaXNlYyBmcm9tIHNwbHVua21haW5zZXJ2ZXIiLCJzdWIiOiJtaWxsaXNlYyIsImF1ZCI6IkdpdEh1YiBBUEkgU2tyaXB0aSIsImlkcCI6IlNwbHVuayIsImp0aSI6IjNkMzg4MTQ4OWEyNGY4NWM0MzIxNTUzNmVjODdkMDFhNTRmNzIyMTkwM2I4NjJmNjFjYjdiN2ZhMTgzYzdiMzQiLCJpYXQiOjE3ODE4ODcyODIsImV4cCI6MTc4NDQ3OTI4MiwibmJyIjoxNzgxODg3MjgyfQ.Yof2XsuxIWXLAPqJlW4XJ2FAYucNfRux-OzGqLei3BXcLb8LTpUnE5pAu5Kq5Ech5E7__phR7xp7TQD3M9O1aQ"
+# --- SPLUNK KONFİQURASİYASI (YENİ SERVER) ---
+SPLUNK_HOST = "https://9.223.115.161:8089" 
+SPLUNK_TOKEN = "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIjoiSFM1MTIiLCJ2ZXIiOiJ2MiIsInR0eXAiOiJzdGF0aWMifQ.eyJpc3MiOiJtaWxsaXNlYyBmcm9tIHNwbHVua3NlcnZlciIsInN1YiI6Im1pbGxpc2VjIiwiYXVkIjoiR2l0aHViX2FwaSIsImlkcCI6IlNwbHVuayIsImp0aSI6Ijc2ZTkzZWM4M2Q3MGVhOGE1ZTU0MTRmOWI4YTQ1OWIwMTEwM2U4MGJkN2RlNGRjNmNiZmVlNmM4MjgxN2Q1NzkiLCJpYXQiOjE3ODIyMTc1NzAsImV4cCI6MTc4NDgwOTU3MCwibmJyIjoxNzgyMjE3NTcwfQ.fqp4Kcv9nuy_XSl0IyS6QcklHvgf17fOhPT4uOYp2P3cqPYo6VXRi_aobA3u15nUZs6KIMg517T0s-5yKN-wPw"
 APP_CONTEXT = "search" 
 API_ENDPOINT = f"{SPLUNK_HOST}/servicesNS/nobody/{APP_CONTEXT}/saved/searches"
 
+# --- TELEGRAM KONFİQURASİYASI ---
 TELEGRAM_BOT_TOKEN = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
 TELEGRAM_CHAT_ID = "-1004353279755"
 
@@ -35,12 +36,8 @@ def deploy_rule_to_splunk(rule_data):
         "disabled": "0",
         "is_scheduled": "1",
         "cron_schedule": "* * * * *", 
-        
-        # --- SEHRLİ TOXUNUŞ BURADADIR ---
-        # Splunk avtomatik sistemini məcbur edirik ki, "All Time" axtarış etsin.
         "dispatch.earliest_time": "0",
         "dispatch.latest_time": "now",
-        
         "alert_type": "number of events",
         "alert_comparator": "greater than",
         "alert_threshold": "0",
@@ -64,18 +61,24 @@ def deploy_rule_to_splunk(rule_data):
         update_response = requests.post(update_endpoint, headers=headers, data=payload, verify=False)
         if update_response.status_code == 200:
              print(f"🔄 GÜNCƏLLƏNDİ: '{rule_name}' uğurla yeniləndi.\n")
+        else:
+             print(f"❌ XƏTA (Update): {update_response.status_code} - {update_response.text}\n")
     else:
         print(f"❌ XƏTA (Create): {response.status_code} - {response.text}\n")
 
 def main():
     if not os.path.exists(RULES_DIR):
+        print(f"❌ Qovluq tapılmadı: {RULES_DIR}")
         return
     for filename in os.listdir(RULES_DIR):
         if filename.endswith(".json"):
             filepath = os.path.join(RULES_DIR, filename)
             with open(filepath, 'r', encoding='utf-8') as f:
-                rule_data = json.load(f)
-                deploy_rule_to_splunk(rule_data)
+                try:
+                    rule_data = json.load(f)
+                    deploy_rule_to_splunk(rule_data)
+                except json.JSONDecodeError:
+                    print(f"❌ XƏTA: {filename} faylı düzgün JSON deyil.")
 
 if __name__ == "__main__":
     main()
