@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A04",
   "rule_name": "Business Logic Workflow Bypass Detection",
-  "description": "Detects instances where a user reaches the final stages of a critical transaction sequence without executing the required preceding authentication or payment steps.",
+  "description": "Detects instances where a user attempts to manipulate business logic (e.g., negative prices).",
   "severity": "High",
   "owasp_category": "A04:2021-Insecure Design",
-  "search_query": "index=main sourcetype=_json (action=\"checkout_complete\" OR action=\"payment_start\") | transaction session_id maxpause=5m | where NOT match(action, \"payment_success\") AND match(action, \"checkout_complete\")"
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"price=-\""
 }
