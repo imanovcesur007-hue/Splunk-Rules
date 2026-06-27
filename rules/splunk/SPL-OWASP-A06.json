@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A06",
   "rule_name": "Log4j Remote Code Execution (RCE) Exploitation Pattern",
-  "description": "Detects potential exploitation attempts of vulnerable components targeting Log4Shell vulnerabilities via specialized JNDI lookup patterns in headers.",
+  "description": "Detects potential exploitation attempts targeting Log4Shell vulnerabilities.",
   "severity": "Critical",
   "owasp_category": "A06:2021-Vulnerable and Outdated Components",
-  "search_query": "index=main sourcetype=_json | regex _raw=\"\\$\\{jndi:(ldap|rmi|ldaps|dns):.*}\" | stats count by src_ip, dest_ip, user_agent"
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"jndi:ldap\""
 }
