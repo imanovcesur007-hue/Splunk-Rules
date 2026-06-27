@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A03",
   "rule_name": "Advanced SQL Injection Attack Attempt",
-  "description": "Detects classic and advanced SQL injection payloads inside URI queries or web application request strings using strict regex patterns.",
+  "description": "Detects classic and advanced SQL injection payloads inside URI queries.",
   "severity": "Critical",
   "owasp_category": "A03:2021-Injection",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m | regex _raw=\"(?i)(UNION\\s+SELECT|SELECT\\s+.*\\s+FROM|'--|OR\\s+\\d+=\\d+)\" | stats count by src_ip, status_code"
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m | regex _raw=\"(?i)(UNION\\s+SELECT|SELECT\\s+.*\\s+FROM|'--|OR\\s+\\d+=\\d+)\""
 }
