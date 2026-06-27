@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A02",
   "rule_name": "Deprecated and Weak TLS Version Usage",
-  "description": "Identifies incoming or outgoing connections utilizing insecure and deprecated cryptographic protocols (SSLv2/v3 or TLS 1.0/1.1).",
+  "description": "Identifies incoming connections attempting to use insecure HTTP for sensitive paths.",
   "severity": "Medium",
   "owasp_category": "A02:2021-Cryptographic Failures",
-  "search_query": "index=main sourcetype=_json tls_version IN (\"SSLv2\", \"SSLv3\", \"TLSv1.0\", \"TLSv1.1\") | stats count by src_ip, dest_ip, tls_version"
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"http://\" \"/login\""
 }
