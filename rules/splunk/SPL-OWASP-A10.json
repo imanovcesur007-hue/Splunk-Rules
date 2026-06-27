@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A10",
   "rule_name": "Cloud Infrastructure Metadata Service SSRF Attempt",
-  "description": "Detects Server-Side Request Forgery patterns where internal web instances attempt unauthorized outbound communication to cloud metadata endpoints.",
+  "description": "Detects SSRF patterns attempting unauthorized communication to cloud metadata endpoints.",
   "severity": "Critical",
   "owasp_category": "A10:2021-Server-Side Request Forgery",
-  "search_query": "index=main sourcetype=_json dest_ip=169.254.169.254 | stats count by src_ip, uri, user_agent"
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"169.254.169.254\""
 }
