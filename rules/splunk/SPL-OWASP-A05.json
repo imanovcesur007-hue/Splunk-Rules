@@ -4,5 +4,5 @@
   "description": "Monitors attempts to access known backend configurations and administrative panels originating from external IP addresses.",
   "severity": "High",
   "owasp_category": "A05:2021-Security Misconfiguration",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m (\"/admin\" OR \"/config\" OR \"/phpmyadmin\") | stats count by src_ip, status_code"
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m (\"/admin\" OR \"/config\" OR \"/phpmyadmin\")"
 }
