@@ -4,5 +4,5 @@
   "description": "Detects potential exploitation attempts targeting Log4Shell vulnerabilities.",
   "severity": "Critical",
   "owasp_category": "A06:2021-Vulnerable and Outdated Components",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"jndi:ldap\""
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"*jndi:ldap*\""
 }
