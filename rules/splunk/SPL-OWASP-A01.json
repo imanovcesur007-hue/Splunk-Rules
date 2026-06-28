@@ -1,8 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A01",
-  "rule_name": "Potential Insecure Direct Object Reference (IDOR) Detection",
-  "description": "Detects attempts to enumerate unique user profile paths or API endpoints.",
+  "rule_name": "Broken Access Control - Path Traversal Attempt",
+  "description": "Detects directory traversal attempts to access unauthorized or sensitive OS files.",
   "severity": "High",
-  "owasp_category": "A01:2021-Broken Access Control",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"/api/v1/users/\""
+  "owasp_version": "2021",
+  "owasp_id": "A01",
+  "owasp_name": "Broken Access Control",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*..%2f*\" OR \"*../*\" OR \"*/etc/shadow*\" OR \"*/etc/passwd*\" OR \"*/windows/win.ini*\")"
 }
