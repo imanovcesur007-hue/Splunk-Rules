@@ -1,8 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A03",
-  "rule_name": "Advanced SQL Injection Attack Attempt",
-  "description": "Detects classic and advanced SQL injection payloads inside URI queries.",
+  "rule_name": "Injection - SQLi and XSS Signatures",
+  "description": "Detects common SQL injection and Cross-Site Scripting (XSS) payload signatures.",
   "severity": "Critical",
-  "owasp_category": "A03:2021-Injection",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m | regex _raw=\"(?i)(UNION\\s+SELECT|SELECT\\s+.*\\s+FROM|'--|OR\\s+\\d+=\\d+)\""
+  "owasp_version": "2021",
+  "owasp_id": "A03",
+  "owasp_name": "Injection",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*UNION SELECT*\" OR \"*OR 1=1*\" OR \"*<script>*\" OR \"*%3Cscript%3E*\" OR \"*WAITFOR DELAY*\")"
 }
