@@ -1,10 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A04",
-  "rule_name": "Insecure Design - Business Logic Manipulation",
-  "description": "Monitors business logic endpoints for negative integers which may lead to logic bypass.",
-  "severity": "High",
-  "owasp_version": "2021",
+  "rule_name": "Cryptographic Failures - Insecure HTTP Access",
+  "description": "Identifies attempts to access authentication endpoints over unencrypted HTTP channels.",
+  "severity": "Medium",
+  "owasp_version": "2025",
   "owasp_id": "A04",
-  "owasp_name": "Insecure Design",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*price=-*\" OR \"*amount=-*\" OR \"*qty=-*\" OR \"*balance=-*\" OR \"*discount=-*\")"
+  "owasp_name": "Cryptographic Failures",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*login*\" OR \"*signin*\" OR \"*auth*\") \"301\""
 }
