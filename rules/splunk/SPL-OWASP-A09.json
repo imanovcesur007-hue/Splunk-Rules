@@ -1,10 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A09",
-  "rule_name": "Logging and Monitoring Failures - Log Access Attempt",
-  "description": "Detects local file inclusion reconnaissance targeting OS and application log files.",
+  "rule_name": "Logging and Alerting Failures - Log Access Attempt",
+  "description": "Detects local file inclusion reconnaissance targeting specifically OS and application log files.",
   "severity": "High",
-  "owasp_version": "2021",
+  "owasp_version": "2025",
   "owasp_id": "A09",
-  "owasp_name": "Security Logging and Monitoring Failures",
+  "owasp_name": "Security Logging and Alerting Failures",
   "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*/var/log/*\" OR \"*.log*\" OR \"*.evtx*\" OR \"*/var/adm/*\" OR \"*/audit/*\")"
 }
