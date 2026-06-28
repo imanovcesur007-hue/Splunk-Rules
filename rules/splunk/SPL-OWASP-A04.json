@@ -1,8 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A04",
-  "rule_name": "Business Logic Workflow Bypass Detection",
-  "description": "Detects instances where a user attempts to manipulate business logic using negative values in common parameters.",
+  "rule_name": "Insecure Design - Business Logic Manipulation",
+  "description": "Monitors business logic endpoints for negative integers which may lead to logic bypass.",
   "severity": "High",
-  "owasp_category": "A04:2021-Insecure Design",
-  "search_query": "index=main sourcetype=_json _index_earliest=-15m (\"*price=-*\" OR \"*amount=-*\" OR \"*qty=-*\" OR \"*balance=-*\")"
+  "owasp_version": "2021",
+  "owasp_id": "A04",
+  "owasp_name": "Insecure Design",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*price=-*\" OR \"*amount=-*\" OR \"*qty=-*\" OR \"*balance=-*\" OR \"*discount=-*\")"
 }
