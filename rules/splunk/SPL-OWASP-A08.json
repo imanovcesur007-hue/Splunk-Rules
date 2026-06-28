@@ -4,5 +4,5 @@
   "description": "Detects attempts to inject serialized Java objects (Base64 signature 'rO0AB') which can lead to Remote Code Execution.",
   "severity": "Critical",
   "owasp_category": "A08:2021-Software and Data Integrity Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"*rO0AB*\""
+  "search_query": "index=main sourcetype=_json _index_earliest=-15m \"*rO0AB*\""
 }
