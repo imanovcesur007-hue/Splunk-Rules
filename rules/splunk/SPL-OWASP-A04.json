@@ -4,5 +4,5 @@
   "description": "Detects instances where a user attempts to manipulate business logic (e.g., negative prices).",
   "severity": "High",
   "owasp_category": "A04:2021-Insecure Design",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"price=-\""
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"*price=-*\""
 }
