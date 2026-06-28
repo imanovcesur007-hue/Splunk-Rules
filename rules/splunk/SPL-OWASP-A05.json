@@ -1,8 +1,8 @@
 {
-  "rule_id": "SPL-OWASP-A04",
-  "rule_name": "Business Logic Workflow Bypass Detection",
-  "description": "Detects instances where a user attempts to manipulate business logic (e.g., negative prices).",
+  "rule_id": "SPL-OWASP-A05",
+  "rule_name": "External Access to Sensitive Administrative Interfaces",
+  "description": "Monitors attempts to access known backend configurations and administrative panels originating from external IP addresses.",
   "severity": "High",
-  "owasp_category": "A04:2021-Insecure Design",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"*price=-*\""
+  "owasp_category": "A05:2021-Security Misconfiguration",
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m (\"/admin\" OR \"/config\" OR \"/phpmyadmin\")"
 }
