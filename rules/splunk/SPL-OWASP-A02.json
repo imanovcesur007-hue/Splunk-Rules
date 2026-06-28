@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A02",
   "rule_name": "Deprecated and Weak TLS Version Usage",
-  "description": "Identifies incoming connections attempting to use insecure or deprecated HTTP protocols for sensitive paths.",
+  "description": "Identifies incoming connections attempting to use insecure HTTP for sensitive paths.",
   "severity": "Medium",
   "owasp_category": "A02:2021-Cryptographic Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"HTTP/1.0\" \"/login\""
+  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"/login\" \"301\""
 }
