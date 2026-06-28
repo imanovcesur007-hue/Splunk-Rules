@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A09",
-  "rule_name": "Security Event Log Clearing",
-  "description": "Detects the explicit clearing of security or system event logs by privileged accounts.",
-  "severity": "Critical",
+  "rule_name": "Log File Access and Reconnaissance Attempt",
+  "description": "Detects attempts to access, read, or manipulate sensitive server and system log files across different OS environments.",
+  "severity": "High",
   "owasp_category": "A09:2021-Security Logging and Monitoring Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m (\"clear logs\" OR \"rm -rf /var/log\")"
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*var/log*\" OR \"*.log\" OR \"*.evtx\" OR \"*var/adm*\")"
 }
