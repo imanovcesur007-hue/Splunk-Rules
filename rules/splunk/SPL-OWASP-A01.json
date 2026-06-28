@@ -1,10 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A01",
   "rule_name": "Broken Access Control - Path Traversal Attempt",
-  "description": "Detects directory traversal attempts to access unauthorized or sensitive OS files.",
+  "description": "Detects directory traversal attempts to access sensitive OS files (excluding log and config files).",
   "severity": "High",
-  "owasp_version": "2021",
+  "owasp_version": "2025",
   "owasp_id": "A01",
-  "owasp_name": "Broken Accesss Control",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*..%2f*\" OR \"*../*\" OR \"*/etc/shadow*\" OR \"*/etc/passwd*\" OR \"*/windows/win.ini*\")"
+  "owasp_name": "Broken Access Control",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*..%2f*\" OR \"*../*\" OR \"*/etc/shadow*\" OR \"*/etc/passwd*\" OR \"*/windows/win.ini*\") NOT (\"*.log*\" OR \"*/var/log/*\" OR \"*/.env*\")"
 }
