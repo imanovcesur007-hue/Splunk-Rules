@@ -1,8 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A07",
-  "rule_name": "High-Volume Credential Spraying Attack",
-  "description": "Detects password spraying behavior targeting standard authentication endpoints.",
+  "rule_name": "Authentication Failures - Credential Spraying",
+  "description": "Detects POST requests to authentication endpoints, filtering out mere HTTP redirects.",
   "severity": "High",
-  "owasp_category": "A07:2021-Identification and Authentication Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-15m \"POST\" (\"/login\" OR \"/signin\" OR \"/auth\")"
+  "owasp_version": "2021",
+  "owasp_id": "A07",
+  "owasp_name": "Identification and Authentication Failures",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m \"POST\" (\"*login*\" OR \"*signin*\" OR \"*auth*\" OR \"*token*\") NOT \"301\""
 }
