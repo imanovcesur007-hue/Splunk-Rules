@@ -5,6 +5,6 @@
   "severity": "High",
   "owasp_version": "2021",
   "owasp_id": "A01",
-  "owasp_name": "Broken Access Control",
+  "owasp_name": "Broken Accesss Control",
   "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*..%2f*\" OR \"*../*\" OR \"*/etc/shadow*\" OR \"*/etc/passwd*\" OR \"*/windows/win.ini*\")"
 }
