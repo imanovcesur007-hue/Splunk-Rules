@@ -1,10 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A02",
-  "rule_name": "Cryptographic Failures - Insecure HTTP Access",
-  "description": "Identifies attempts to access authentication endpoints over unencrypted HTTP channels.",
+  "rule_name": "Security Misconfiguration - Exposed Sensitive Files",
+  "description": "Detects access attempts to default configuration files, environment variables, or dev directories.",
   "severity": "Medium",
-  "owasp_version": "2021",
+  "owasp_version": "2025",
   "owasp_id": "A02",
-  "owasp_name": "Cryptographic Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*login*\" OR \"*signin*\" OR \"*auth*\") \"301\""
+  "owasp_name": "Security Misconfiguration",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*/.env*\" OR \"*/.git/*\" OR \"*/phpinfo.php*\" OR \"*/config.json*\" OR \"*/server-status*\") NOT (\"*../*\" OR \"*..%2f*\")"
 }
