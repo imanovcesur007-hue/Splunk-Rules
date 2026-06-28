@@ -1,8 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A10",
-  "rule_name": "Server-Side Request Forgery (SSRF) Attempt",
-  "description": "Detects attempts to exploit SSRF vulnerabilities by monitoring requests to internal IP addresses or localhost.",
+  "rule_name": "SSRF - Internal Network Scanning",
+  "description": "Detects Server-Side Request Forgery attempts pointing to localhost, internal IPs, or metadata APIs.",
   "severity": "Critical",
-  "owasp_category": "A10:2021-Server-Side Request Forgery (SSRF)",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m (\"*localhost*\" OR \"*127.0.0.1*\" OR \"*169.254.169.254*\" OR \"*.internal*\")"
+  "owasp_version": "2021",
+  "owasp_id": "A10",
+  "owasp_name": "Server-Side Request Forgery (SSRF)",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*localhost*\" OR \"*127.0.0.1*\" OR \"*169.254.169.254*\" OR \"*.internal*\" OR \"*aws-meta-data*\")"
 }
