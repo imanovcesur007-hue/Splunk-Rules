@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A07",
   "rule_name": "High-Volume Credential Spraying Attack",
-  "description": "Detects password spraying behavior where a single source triggers multiple authentication attempts.",
+  "description": "Detects password spraying behavior targeting standard authentication endpoints.",
   "severity": "High",
   "owasp_category": "A07:2021-Identification and Authentication Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"POST\" \"/login\""
+  "search_query": "index=main sourcetype=_json _index_earliest=-15m \"POST\" (\"/login\" OR \"/signin\" OR \"/auth\")"
 }
