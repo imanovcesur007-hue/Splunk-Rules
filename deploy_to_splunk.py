@@ -26,13 +26,24 @@ RULES_DIR = "rules/splunk/"
 def deploy_rule_to_splunk(rule_data):
     rule_name = rule_data["rule_name"]
     
-    telegram_message = f"🚨 SOC ALERT: YENİ TƏHDİD AŞKARLANDI! 🚨\n\nQayda: {rule_name}\nKateqoriya: {rule_data['owasp_id']}:{rule_data['owasp_version']}-{rule_data['owasp_name']}\nCiddiyyət: {rule_data['severity']}\n\nTəcili Splunk panelinə daxil olub analiz edin!"
+    # Köhnə və yeni JSON formatlarını qəzaya uğramadan dəstəkləmək üçün Fallback mexanizmi
+    owasp_id = rule_data.get("owasp_id")
+    owasp_version = rule_data.get("owasp_version")
+    owasp_name = rule_data.get("owasp_name")
+    
+    if owasp_id and owasp_version and owasp_name:
+        owasp_details = f"{owasp_id}:{owasp_version}-{owasp_name}"
+    else:
+        # Əgər yeni sahələr yoxdursa, köhnə owasp_category sahəsinə baxır, o da yoxdursa "N/A" yazır
+        owasp_details = rule_data.get("owasp_category", "N/A")
+    
+    telegram_message = f"🚨 SOC ALERT: YENİ TƏHDİD AŞKARLANDI! 🚨\n\nQayda: {rule_name}\nKateqoriya: {owasp_details}\nCiddiyyət: {rule_data['severity']}\n\nTəcili Splunk panelinə daxil olub analiz edin!"
     encoded_message = urllib.parse.quote(telegram_message)
     TELEGRAM_WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={encoded_message}"
     
     payload = {
         "search": rule_data["search_query"],
-        "description": f"{rule_data['description']} | OWASP Category: {rule_data['owasp_id']}:{rule_data['owasp_version']}-{rule_data['owasp_name']} | Severity: {rule_data['severity']}",
+        "description": f"{rule_data['description']} | OWASP Category: {owasp_details} | Severity: {rule_data['severity']}",
         "disabled": "0",
         "is_scheduled": "1",
         "cron_schedule": "* * * * *", 
@@ -46,7 +57,7 @@ def deploy_rule_to_splunk(rule_data):
         "action.webhook.param.url": TELEGRAM_WEBHOOK_URL
     }
 
-    print(f"Emal edilir: {rule_data['rule_id']} - {rule_name}...")
+    print(f"Emal edilir: {rule_data.get('rule_id', 'UNKNOWN')} - {rule_name}...")
     
     create_payload = payload.copy()
     create_payload["name"] = rule_name
