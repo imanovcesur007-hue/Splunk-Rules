@@ -1,8 +1,8 @@
 {
   "rule_id": "SPL-OWASP-A04",
   "rule_name": "Business Logic Workflow Bypass Detection",
-  "description": "Detects instances where a user attempts to manipulate business logic (e.g., negative prices).",
+  "description": "Detects instances where a user attempts to manipulate business logic using negative values in common parameters.",
   "severity": "High",
   "owasp_category": "A04:2021-Insecure Design",
-  "search_query": "index=main sourcetype=_json _index_earliest=-2m \"*price=-*\""
+  "search_query": "index=main sourcetype=_json _index_earliest=-15m (\"*price=-*\" OR \"*amount=-*\" OR \"*qty=-*\" OR \"*balance=-*\")"
 }
