@@ -1,10 +1,10 @@
 {
   "rule_id": "SPL-OWASP-A03",
-  "rule_name": "Injection - SQLi and XSS Signatures",
-  "description": "Detects common SQL injection and Cross-Site Scripting (XSS) payload signatures.",
+  "rule_name": "Supply Chain Failures - Vulnerable Component Signatures",
+  "description": "Detects exploitation attempts of known supply chain vulnerabilities (e.g., Log4Shell) and exposed package manifests.",
   "severity": "Critical",
-  "owasp_version": "2021",
+  "owasp_version": "2025",
   "owasp_id": "A03",
-  "owasp_name": "Injection",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*UNION SELECT*\" OR \"*OR 1=1*\" OR \"*<script>*\" OR \"*%3Cscript%3E*\" OR \"*WAITFOR DELAY*\")"
+  "owasp_name": "Software Supply Chain Failures",
+  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*jndi:ldap*\" OR \"*jndi:rmi*\" OR \"*/package-lock.json*\" OR \"*/.npmrc*\" OR \"*composer.lock*\") NOT (\"*../*\" OR \"*..%2f*\")"
 }
