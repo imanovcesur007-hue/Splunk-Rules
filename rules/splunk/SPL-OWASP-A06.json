@@ -1,7 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A06",
-    "rule_name": "Insecure Design - Negative Value Manipulation",
-    "severity": "High",
-    "owasp_id": "A06",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<param>(price|amount|qty|balance|discount))=(?<val>-\\d+)\"\n| where isnotnull(val)\n| eval rule=\"A06\", sev=\"High\"\n| table _time, src_ip, param, val, rule, sev"
-  }
+  "name": "OWASP_A06_Vulnerable_Components",
+  "description": "Köhnəlmiş və ya məlum CVE (Məsələn Log4j, Spring4Shell) zəiflikləri axtarışı.",
+  "search": "index=web host=\"millibluesec.online\" (useragent=\"*jndi:ldap*\" OR uri=\"*CVE-202*\") | stats count by clientip, useragent | search count > 0",
+  "cron_schedule": "* * * * *"
+}
