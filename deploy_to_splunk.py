@@ -40,7 +40,13 @@ def get_existing_rules():
 
 def read_local_rules():
     local_rules = {}
-    for file_path in glob.glob("rules/splunk/*.conf"):
-        rule_name = os.path.basename(file_path).replace(".conf", "")
-        with open(file_path, "r", encoding="utf-8") as f:
-            spl_query = f.read().strip()
+    search_path = "rules/splunk/*.conf"
+    # Debug üçün axtarış yolunu çap edirik
+    logger.info(f"Axtarış aparılan qovluq: {os.getcwd()}")
+    files = glob.glob(search_path)
+    logger.info(f"Tapılan fayllar: {files}") # <--- Bu sətir problemin kökünü açacaq
+    
+    if not files:
+        logger.warning(f"Heç bir fayl tapılmadı! Axtarış yolu: {search_path}")
+        return local_rules
+    # ... qalan kod olduğu kimi qalır
