@@ -36,4 +36,5 @@ jobs:
           SPLUNK_HOST: "https://9.223.115.161:8089"
           SPLUNK_TOKEN: ${{ secrets.SPLUNK_TOKEN }}
         run: |
+          ls -R  # <--- Bütün faylları siyahılayacaq, strukturu görəcəyik
           python deploy_to_splunk.py
