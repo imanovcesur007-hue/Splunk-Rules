@@ -18,7 +18,6 @@ OWNER = "nobody"
 TELEGRAM_TOKEN = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
 TELEGRAM_CHAT_ID = "-1004353279755"
 
-# YENİLƏNMİŞ TELEGRAM WEBHOOK (Bizim sadə .conf fayllarımızla 100% uyğun işləməsi üçün)
 WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&parse_mode=HTML&text=%F0%9F%9A%A8%20%3Cb%3EMilliBlueSec%20SIEM%20Alert%3C%2Fb%3E%20%F0%9F%9A%A8%0A%0A%3Cb%3EQayda%3A%3C%2Fb%3E%20%24name%24%0A%3Cb%3EH%C3%BCcum%20Vaxt%C4%B1%3A%3C%2Fb%3E%20%24result._time%24%0A%0A%E2%9A%A0%EF%B8%8F%20%3Cb%3ET%C9%99cili%20Splunk%20panelin%C9%99%20daxil%20olub%20loglar%C4%B1%20analiz%20edin%21%3C%2Fb%3E"
 
 if not SPLUNK_TOKEN:
@@ -30,7 +29,6 @@ API_BASE_URL = f"{SPLUNK_HOST}/servicesNS/{OWNER}/{APP_CONTEXT}/saved/searches"
 
 
 def get_existing_rules():
-    # YENİLƏNİB: Artıq fayl adlarına uyğun olaraq "_Detection" sözü ilə bitən qaydaları axtarır
     params = {"output_mode": "json", "count": 0, "search": "name=*_Detection"}
     try:
         res = requests.get(API_BASE_URL, headers=HEADERS, params=params, verify=False, timeout=30)
@@ -45,8 +43,8 @@ def read_local_rules():
     local_rules = {}
     base_path = os.path.dirname(os.path.abspath(__file__))
     
-    # YENİLƏNİB: Fayl yolu GitHub repozitoriyanızın şəklinə uyğunlaşdırıldı
-    search_path = os.path.join(base_path, "rules", "*.conf")
+    # DÜZƏLDİLDİ: Fayllar rules/splunk/ qovluğundadır
+    search_path = os.path.join(base_path, "rules", "splunk", "*.conf")
     
     logger.info(f"Axtarış yolu: {search_path}")
     files = glob.glob(search_path)
