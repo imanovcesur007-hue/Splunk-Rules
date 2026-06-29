@@ -1,7 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A07",
-    "rule_name": "Authentication Failures - Credential Spraying",
-    "severity": "High",
-    "owasp_id": "A07",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<method>POST) (?<uri_path>[^\\s]+).*?(?<status>\\d{3})\"\n| where method=\"POST\"\n  AND match(uri_path, \"/(login|signin|auth|token)([/?]|$)\")\n  AND status!=\"301\"\n| eval rule=\"A07\", sev=\"High\"\n| table _time, src_ip, uri_path, status, rule, sev"
-  }
+  "name": "OWASP_A07_Authentication_Failures",
+  "description": "Qısa müddətdə (1 dəqiqə) eyni IP-dən kütləvi Brute-Force cəhdləri.",
+  "search": "index=web host=\"millibluesec.online\" uri=\"*/login*\" status=401 | stats count by clientip | search count > 5",
+  "cron_schedule": "* * * * *"
+}
