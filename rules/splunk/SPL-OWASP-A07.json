@@ -1,10 +1,7 @@
 {
-  "rule_id": "SPL-OWASP-A07",
-  "rule_name": "Authentication Failures - Credential Spraying",
-  "description": "Detects POST requests to authentication endpoints, isolating from mere HTTP redirects.",
-  "severity": "High",
-  "owasp_version": "2025",
-  "owasp_id": "A07",
-  "owasp_name": "Authentication Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m \"POST\" (\"*login*\" OR \"*signin*\" OR \"*auth*\" OR \"*token*\") NOT \"301\""
-}
+    "rule_id": "SPL-OWASP-A07",
+    "rule_name": "Authentication Failures - Credential Spraying",
+    "severity": "High",
+    "owasp_id": "A07",
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<method>POST) (?<uri_path>[^\\s]+).*?(?<status>\\d{3})\"\n| where method=\"POST\"\n  AND match(uri_path, \"/(login|signin|auth|token)([/?]|$)\")\n  AND status!=\"301\"\n| eval rule=\"A07\", sev=\"High\"\n| table _time, src_ip, uri_path, status, rule, sev"
+  }
