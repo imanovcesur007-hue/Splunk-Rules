@@ -1,10 +1,7 @@
 {
-  "rule_id": "SPL-OWASP-A09",
-  "rule_name": "Logging and Alerting Failures - Log Access Attempt",
-  "description": "Detects local file inclusion reconnaissance targeting specifically OS and application log files.",
-  "severity": "High",
-  "owasp_version": "2025",
-  "owasp_id": "A09",
-  "owasp_name": "Security Logging and Alerting Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*/var/log/*\" OR \"*.log*\" OR \"*.evtx*\" OR \"*/var/adm/*\" OR \"*/audit/*\")"
-}
+    "rule_id": "SPL-OWASP-A09",
+    "rule_name": "Logging Failures - Log File Access (LFI)",
+    "severity": "High",
+    "owasp_id": "A09",
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(/var/log/|/var/adm/|/audit/|\\.log$|\\.evtx$)\")\n  AND NOT match(uri_path, \"(\\.\\./|\\.\\.%2[Ff])\")\n| eval rule=\"A09\", sev=\"High\"\n| table _time, src_ip, uri_path, rule, sev"
+  }
