@@ -1,8 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A02",
-    "rule_name": "Security Misconfiguration - Exposed Config Files",
-    "severity": "Medium",
-    "owasp_id": "A02",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(/\\.env$|/\\.git/|/phpinfo\\.php|/config\\.json|/server-status)\")\n  AND NOT match(uri_path, \"(\\.\\./|\\.\\.%2[Ff])\")\n| eval rule=\"A02\", sev=\"Medium\"\n| table _time, src_ip, uri_path, rule, sev"
-  }
-
+  "name": "OWASP_A02_Cryptographic_Failures",
+  "description": "Zəif şifrələmə protokollarının (TLSv1.0, HTTP) istifadəsi cəhdləri.",
+  "search": "index=web host=\"millibluesec.online\" (protocol=\"HTTP\" OR ssl_version=\"TLSv1.0\" OR ssl_version=\"TLSv1.1\") | stats count by clientip, uri | search count > 0",
+  "cron_schedule": "* * * * *"
+}
