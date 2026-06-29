@@ -1,7 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A10",
-    "rule_name": "Exception Handling - Verbose Error Leakage",
-    "severity": "Medium",
-    "owasp_id": "A10",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<err_sig>Stack trace:|java\\.lang\\.\\w+Exception|mysql_fetch_\\w+|Syntax error in SQL|Uncaught TypeError)\"\n| where isnotnull(err_sig)\n| eval rule=\"A10\", sev=\"Medium\"\n| table _time, src_ip, err_sig, rule, sev"
-  }
+  "name": "OWASP_A10_SSRF",
+  "description": "Server vasitəsilə daxili şəbəkəyə (Internal IP) edilən SSRF cəhdləri.",
+  "search": "index=web host=\"millibluesec.online\" (uri_query=\"*127.0.0.1*\" OR uri_query=\"*169.254.169.254*\" OR uri_query=\"*localhost*\") | stats count by clientip, uri_query | search count > 0",
+  "cron_schedule": "* * * * *"
+}
