@@ -1,7 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A09",
-    "rule_name": "Logging Failures - Log File Access (LFI)",
-    "severity": "High",
-    "owasp_id": "A09",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(/var/log/|/var/adm/|/audit/|\\.log$|\\.evtx$)\")\n  AND NOT match(uri_path, \"(\\.\\./|\\.\\.%2[Ff])\")\n| eval rule=\"A09\", sev=\"High\"\n| table _time, src_ip, uri_path, rule, sev"
-  }
+  "name": "OWASP_A09_Logging_Failures",
+  "description": "Hücumçunun logları silmək və ya manipulyasiya etmək cəhdləri.",
+  "search": "index=web host=\"millibluesec.online\" (uri=\"*/clear_logs*\" OR uri=\"*/delete_audit*\") method=POST | stats count by clientip | search count > 0",
+  "cron_schedule": "* * * * *"
+}
