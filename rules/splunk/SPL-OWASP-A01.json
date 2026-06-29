@@ -1,10 +1,7 @@
 {
-  "rule_id": "SPL-OWASP-A01",
-  "rule_name": "Broken Access Control - Path Traversal Attempt",
-  "description": "Detects directory traversal attempts to access sensitive OS files (excluding log and config files).",
-  "severity": "High",
-  "owasp_version": "2025",
-  "owasp_id": "A01",
-  "owasp_name": "Broken Access Control",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*..%2f*\" OR \"*../*\" OR \"*/etc/shadow*\" OR \"*/etc/passwd*\" OR \"*/windows/win.ini*\") NOT (\"*.log*\" OR \"*/var/log/*\" OR \"*/.env*\")"
-}
+    "rule_id": "SPL-OWASP-A01",
+    "rule_name": "Broken Access Control - Path Traversal",
+    "severity": "High",
+    "owasp_id": "A01",
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(\\.\\./|\\.\\.%2[Ff]|/etc/passwd|/etc/shadow|/windows/win\\.ini)\")\n  AND NOT match(uri_path, \"(\\.log$|/var/log/|/.env$|/audit/)\")\n| eval rule=\"A01\", sev=\"High\"\n| table _time, src_ip, uri_path, rule, sev"
+  }
