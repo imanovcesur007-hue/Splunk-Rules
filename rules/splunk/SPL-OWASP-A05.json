@@ -1,7 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A05",
-    "rule_name": "Injection - SQLi and XSS",
-    "severity": "Critical",
-    "owasp_id": "A05",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(UNION\\s+SELECT|OR\\s+1=1|<script[^>]*>|%3Cscript|WAITFOR\\s+DELAY)\")\n| eval rule=\"A05\", sev=\"Critical\"\n| table _time, src_ip, uri_path, rule, sev"
-  }
+  "name": "OWASP_A05_Security_Misconfiguration",
+  "description": "Gizli mühit fayllarına (.env) və konfiqurasiya detallarına çıxış.",
+  "search": "index=web host=\"millibluesec.online\" (uri=\"*/.env\" OR uri=\"*/.git/*\" OR uri=\"*phpinfo.php\") | stats count by clientip, uri | search count > 0",
+  "cron_schedule": "* * * * *"
+}
