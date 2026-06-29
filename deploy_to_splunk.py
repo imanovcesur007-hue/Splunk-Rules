@@ -11,16 +11,18 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - 
 logger = logging.getLogger(__name__)
 
 SPLUNK_HOST = os.getenv("SPLUNK_HOST", "https://9.223.115.161:8089")
-SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN")
+SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN", "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIjoiSFM1MTIiLCJ2ZXIiOiJ2MiIsInR0eXAiOiJzdGF0aWMifQ.eyJpc3MiOiJtaWxsaXNlYyBmcm9tIHNwbHVua3NlcnZlciIsInN1YiI6Im1pbGxpc2VjIiwiYXVkIjoiR2l0aHViX2FwaSIsImlkcCI6IlNwbHVuayIsImp0aSI6Ijc2ZTkzZWM4M2Q3MGVhOGE1ZTU0MTRmOWI4YTQ1OWIwMTEwM2U4MGJkN2RlNGRjNmNiZmVlNmM4MjgxN2Q1NzkiLCJpYXQiOjE3ODIyMTc1NzAsImV4cCI6MTc4NDgwOTU3MCwibmJyIjoxNzgyMjE3NTcwfQ.fqp4Kcv9nuy_XSl0IyS6QcklHvgf17fOhPT4uOYp2P3cqPYo6VXRi_aobA3u15nUZs6KIMg517T0s-5yKN-wPw")
 APP_CONTEXT = "search"
 OWNER = "nobody"
 
 TELEGRAM_TOKEN = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
 TELEGRAM_CHAT_ID = "-1004353279755"
-WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&parse_mode=HTML&text=%F0%9F%9A%A8%20%3Cb%3EMilliBlueSec%20SIEM%20Alert%3C%2Fb%3E%20%F0%9F%9A%A8%0A%0A%3Cb%3ERule%20Name%3A%3C%2Fb%3E%20%24name%24%0A%3Cb%3EAttack%20Type%3A%3C%2Fb%3E%20%24result.attack_type%24%0A%3Cb%3ESource%20IP%3A%3C%2Fb%3E%20%24result.src_ip%24%0A%3Cb%3EDestination%3A%3C%2Fb%3E%20%24result.dest%24%0A%3Cb%3EURI%3A%3C%2Fb%3E%20%24result.uri%24%0A%3Cb%3EHTTP%20Method%3A%3C%2Fb%3E%20%24result.http_method%24%0A%3Cb%3ESeverity%3A%3C%2Fb%3E%20%24result.severity%24%0A%3Cb%3ETime%3A%3C%2Fb%3E%20%24result.time_formatted%24%0A%3Cb%3EHost%3A%3C%2Fb%3E%20%24result.host%24%0A%3Cb%3EIndex%3A%3C%2Fb%3E%20%24result.index%24%0A%3Cb%3ERecommendation%3A%3C%2Fb%3E%20%24result.recommendation%24"
+
+# YENİLƏNMİŞ TELEGRAM WEBHOOK (Bizim sadə .conf fayllarımızla 100% uyğun işləməsi üçün)
+WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&parse_mode=HTML&text=%F0%9F%9A%A8%20%3Cb%3EMilliBlueSec%20SIEM%20Alert%3C%2Fb%3E%20%F0%9F%9A%A8%0A%0A%3Cb%3EQayda%3A%3C%2Fb%3E%20%24name%24%0A%3Cb%3EH%C3%BCcum%20Vaxt%C4%B1%3A%3C%2Fb%3E%20%24result._time%24%0A%0A%E2%9A%A0%EF%B8%8F%20%3Cb%3ET%C9%99cili%20Splunk%20panelin%C9%99%20daxil%20olub%20loglar%C4%B1%20analiz%20edin%21%3C%2Fb%3E"
 
 if not SPLUNK_TOKEN:
-    logger.error("CRITICAL: SPLUNK_TOKEN mühit dəyişəni tapılmadı! Deployment dayandırılır.")
+    logger.error("CRITICAL: SPLUNK_TOKEN tapılmadı! Deployment dayandırılır.")
     sys.exit(1)
 
 HEADERS = {"Authorization": f"Bearer {SPLUNK_TOKEN}"}
@@ -28,7 +30,8 @@ API_BASE_URL = f"{SPLUNK_HOST}/servicesNS/{OWNER}/{APP_CONTEXT}/saved/searches"
 
 
 def get_existing_rules():
-    params = {"output_mode": "json", "count": 0, "search": "name=SPL-OWASP-*"}
+    # YENİLƏNİB: Artıq fayl adlarına uyğun olaraq "_Detection" sözü ilə bitən qaydaları axtarır
+    params = {"output_mode": "json", "count": 0, "search": "name=*_Detection"}
     try:
         res = requests.get(API_BASE_URL, headers=HEADERS, params=params, verify=False, timeout=30)
         res.raise_for_status()
@@ -40,9 +43,10 @@ def get_existing_rules():
 
 def read_local_rules():
     local_rules = {}
-    # Skriptin olduğu yeri əsas götürərək tam (absolute) yol yaradırıq
     base_path = os.path.dirname(os.path.abspath(__file__))
-    search_path = os.path.join(base_path, "rules", "splunk", "*.conf")
+    
+    # YENİLƏNİB: Fayl yolu GitHub repozitoriyanızın şəklinə uyğunlaşdırıldı
+    search_path = os.path.join(base_path, "rules", "*.conf")
     
     logger.info(f"Axtarış yolu: {search_path}")
     files = glob.glob(search_path)
@@ -73,7 +77,6 @@ def read_local_rules():
             "alert.severity": "4",
             "alert.suppress": "1",
             "alert.suppress.period": "5m",
-            "alert.suppress.fields": "src_ip",
             "action.webhook": "1",
             "action.webhook.param.url": WEBHOOK_URL
         }
