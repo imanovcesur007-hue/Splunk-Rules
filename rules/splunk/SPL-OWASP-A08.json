@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A08_Integrity_Failures",
-  "description": "Təhlükəli deserialization cəhdləri (Base64 payloadlar).",
-  "search": "index=web host=\"millibluesec.online\" (uri_query=\"*O:8:*\" OR uri_query=\"*base64_decode*\") | stats count by clientip | search count > 0",
-  "cron_schedule": "* * * * *"
-}
