@@ -13,8 +13,8 @@ SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT = os.getenv("TELEGRAM_CHAT")
 
-# Telegram URL (Splunk webhook-u bu linkə POST atacaq)
-TELEGRAM_WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT}&text=Diqqet!+Yeni+Hucum+Detect+Olundu:+{millibluesec.online}"
+# Telegram URL (Splunk webhook-u bu linkə POST atacaq) - XƏTA DÜZƏLDİLDİ
+TELEGRAM_WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT}&text=Diqqet!+Yeni+Hucum+Detect+Olundu:+millibluesec.online"
 
 def deploy_rules():
     headers = {
