@@ -1,150 +1,100 @@
 import os
-import json
 import glob
 import requests
 import logging
 import sys
 import urllib3
 
-# Splunk Enterprise tərəfindən istifadə edilən self-signed sertifikat xəbərdarlıqlarını gizlədirik
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Professional logging konfiqurasiyası
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - [%(levelname)s] - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Environment Dəyişənləri (GitHub Actions tərəfindən ötürüləcək)
 SPLUNK_HOST = os.getenv("SPLUNK_HOST", "https://9.223.115.161:8089")
 SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN")
 APP_CONTEXT = "search"
 OWNER = "nobody"
 
+# Mərkəzləşdirilmiş Telegram Alert Konfiqurasiyası
+TELEGRAM_TOKEN = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
+TELEGRAM_CHAT_ID = "-1004353279755"
+WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&parse_mode=HTML&text=%F0%9F%9A%A8%20%3Cb%3EMilliBlueSec%20SIEM%20Alert%3C%2Fb%3E%20%F0%9F%9A%A8%0A%0A%3Cb%3ERule%20Name%3A%3C%2Fb%3E%20%24name%24%0A%3Cb%3EAttack%20Type%3A%3C%2Fb%3E%20%24result.attack_type%24%0A%3Cb%3ESource%20IP%3A%3C%2Fb%3E%20%24result.src_ip%24%0A%3Cb%3EDestination%3A%3C%2Fb%3E%20%24result.dest%24%0A%3Cb%3EURI%3A%3C%2Fb%3E%20%24result.uri%24%0A%3Cb%3EHTTP%20Method%3A%3C%2Fb%3E%20%24result.http_method%24%0A%3Cb%3ESeverity%3A%3C%2Fb%3E%20%24result.severity%24%0A%3Cb%3ETime%3A%3C%2Fb%3E%20%24result.time_formatted%24%0A%3Cb%3EHost%3A%3C%2Fb%3E%20%24result.host%24%0A%3Cb%3EIndex%3A%3C%2Fb%3E%20%24result.index%24%0A%3Cb%3ERecommendation%3A%3C%2Fb%3E%20%24result.recommendation%24"
+
 if not SPLUNK_TOKEN:
     logger.error("CRITICAL: SPLUNK_TOKEN mühit dəyişəni tapılmadı! Deployment dayandırılır.")
     sys.exit(1)
 
-HEADERS = {
-    "Authorization": f"Bearer {SPLUNK_TOKEN}"
-}
-
-# Splunk Saved Searches REST API Endpoints
+HEADERS = {"Authorization": f"Bearer {SPLUNK_TOKEN}"}
 API_BASE_URL = f"{SPLUNK_HOST}/servicesNS/{OWNER}/{APP_CONTEXT}/saved/searches"
 
 
 def get_existing_rules():
-    """Splunk daxilindəki mövcud OWASP qaydalarını gətirir."""
-    logger.info("Splunk API ilə əlaqə qurulur və mövcud qaydalar yoxlanılır...")
-    params = {
-        "output_mode": "json",
-        "count": 0,
-        "search": "name=SPL-OWASP-*"
-    }
+    params = {"output_mode": "json", "count": 0, "search": "name=SPL-OWASP-*"}
     try:
-        response = requests.get(API_BASE_URL, headers=HEADERS, params=params, verify=False, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        rules = {entry["name"]: entry for entry in data.get("entry", [])}
-        logger.info(f"Splunk daxilində {len(rules)} ədəd mövcud 'SPL-OWASP' qaydası tapıldı.")
-        return rules
+        res = requests.get(API_BASE_URL, headers=HEADERS, params=params, verify=False, timeout=30)
+        res.raise_for_status()
+        return {entry["name"]: entry for entry in res.json().get("entry", [])}
     except requests.exceptions.RequestException as e:
-        logger.error(f"Splunk API-dən məlumat alınarkən xəta baş verdi: {e}")
+        logger.error(f"Splunk API xətası: {e}")
         sys.exit(1)
 
 
 def read_local_rules():
-    """Repository-də olan bütün JSON qaydalarını oxuyur."""
-    logger.info("Local repository-dən qaydalar (rules/splunk/*.json) oxunur...")
     local_rules = {}
-    files = glob.glob("rules/splunk/*.json")
-    
-    if not files:
-        logger.warning("Heç bir JSON qayda faylı tapılmadı! 'rules/splunk/' qovluğunu yoxlayın.")
-        return local_rules
+    # Artıq .json əvəzinə təmiz SPL saxlayan .conf faylları axtarılır
+    for file_path in glob.glob("rules/splunk/*.conf"):
+        rule_name = os.path.basename(file_path).replace(".conf", "")
+        with open(file_path, "r", encoding="utf-8") as f:
+            spl_query = f.read().strip()
+        
+        if not spl_query:
+            continue
 
-    for file_path in files:
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                rule_data = json.load(f)
-                rule_name = rule_data.get("name")
-                
-                if not rule_name:
-                    logger.error(f"Fayl '{file_path}' daxilində 'name' parametri yoxdur. Nəzərə alınmır.")
-                    continue
-                
-                if not rule_name.startswith("SPL-OWASP-"):
-                    logger.warning(f"Qayda adı '{rule_name}' ('{file_path}') 'SPL-OWASP-' ilə başlamır. Nəzərə alınmır.")
-                    continue
-
-                local_rules[rule_name] = rule_data
-        except Exception as e:
-            logger.error(f"Fayl oxunarkən xəta baş verdi '{file_path}': {e}")
-            
-    logger.info(f"Repository daxilində {len(local_rules)} ədəd etibarlı qayda tapıldı.")
+        # Splunk REST API üçün payload dinamik formalaşdırılır
+        payload = {
+            "name": rule_name,
+            "search": spl_query,
+            "cron_schedule": "* * * * *",
+            "is_scheduled": "1",
+            "dispatch.earliest_time": "-1m@m",
+            "dispatch.latest_time": "@m",
+            "alert_type": "number of events",
+            "alert_comparator": "greater than",
+            "alert_threshold": "0",
+            "alert.severity": "4",
+            "alert.suppress": "1",
+            "alert.suppress.period": "5m",
+            "alert.suppress.fields": "src_ip",
+            "action.webhook": "1",
+            "action.webhook.param.url": WEBHOOK_URL
+        }
+        local_rules[rule_name] = payload
     return local_rules
 
 
 def create_or_update_rule(rule_name, payload, exists):
-    """Qaydanı Splunk API vasitəsilə yaradır və ya mövcuddursa yeniləyir."""
-    # Məlumatları Splunk x-www-form-urlencoded formatına uyğunlaşdırırıq
     data = payload.copy()
-    
-    # Mövcud qaydanı yeniləyərkən 'name' parametrini payload-dan çıxarırıq (URL-də onsuz da var)
     if exists and "name" in data:
         del data["name"]
 
     try:
-        if exists:
-            logger.info(f"Mövcud qayda yenilənir: {rule_name}")
-            url = f"{API_BASE_URL}/{rule_name}"
-            response = requests.post(url, headers=HEADERS, data=data, verify=False, timeout=30)
+        url = f"{API_BASE_URL}/{rule_name}" if exists else API_BASE_URL
+        res = requests.post(url, headers=HEADERS, data=data, verify=False, timeout=30)
+        if res.status_code in (200, 201):
+            logger.info(f"UĞURLU: {rule_name} {'yeniləndi' if exists else 'yaradıldı'}.")
         else:
-            logger.info(f"Yeni qayda yaradılır: {rule_name}")
-            url = API_BASE_URL
-            response = requests.post(url, headers=HEADERS, data=data, verify=False, timeout=30)
-        
-        if response.status_code in (200, 201):
-            logger.info(f"UĞURLU: {rule_name} (Status: {response.status_code})")
-        else:
-            logger.error(f"XƏTA: {rule_name} emal edilə bilmədi! Status: {response.status_code} - {response.text}")
+            logger.error(f"XƏTA: {rule_name} emal edilmədi! Status: {res.status_code} - {res.text}")
     except Exception as e:
-        logger.error(f"XƏTA: Qayda {rule_name} işlənərkən xəta baş verdi: {e}")
+        logger.error(f"XƏTA: Qayda {rule_name} işlənərkən problem yaşandı: {e}")
 
 
 def delete_rule(rule_name):
-    """Local repository-də olmayan, amma Splunk-da qalan qaydanı silir."""
-    logger.info(f"Mövcudluğunu itirmiş qayda Splunk-dan silinir: {rule_name}")
-    url = f"{API_BASE_URL}/{rule_name}"
     try:
-        response = requests.delete(url, headers=HEADERS, verify=False, timeout=30)
-        if response.status_code == 200:
+        res = requests.delete(f"{API_BASE_URL}/{rule_name}", headers=HEADERS, verify=False, timeout=30)
+        if res.status_code == 200:
             logger.info(f"SİLİNDİ: {rule_name}")
-        else:
-            logger.error(f"XƏTA: {rule_name} silinə bilmədi! Status: {response.status_code} - {response.text}")
     except Exception as e:
-        logger.error(f"XƏTA: Qayda {rule_name} silinərkən xəta baş verdi: {e}")
+        logger.error(f"XƏTA: {rule_name} silinərkən problem yaşandı: {e}")
 
 
 def main():
-    logger.info("==== Splunk SIEM Detection Rules Deployment Process Started ====")
-    
-    existing_rules = get_existing_rules()
-    local_rules = read_local_rules()
-
-    # Yaratmaq və Yeniləmək
-    for rule_name, rule_payload in local_rules.items():
-        exists = rule_name in existing_rules
-        create_or_update_rule(rule_name, rule_payload, exists)
-
-    # Silmək (Cleanup)
-    for rule_name in existing_rules:
-        if rule_name not in local_rules:
-            delete_rule(rule_name)
-            
-    logger.info("==== Deployment Process Successfully Completed ====")
-
-
-if __name__ == "__main__":
-    main()
