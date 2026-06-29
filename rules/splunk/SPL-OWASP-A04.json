@@ -1,8 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A04",
-    "rule_name": "Cryptographic Failures - Auth Over HTTP",
-    "severity": "Medium",
-    "owasp_id": "A04",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<method>GET|POST) (?<uri_path>[^\\s]+).*?(?<status>\\d{3})\"\n| where match(uri_path, \"/(login|signin|auth)([/?]|$)\")\n  AND method=\"GET\"\n  AND status=\"301\"\n| eval rule=\"A04\", sev=\"Medium\"\n| table _time, src_ip, uri_path, status, rule, sev"
-  }
-
+  "name": "OWASP_A04_Insecure_Design",
+  "description": "Məntiqi zəifliklərdən istifadə edərək eyni IP-dən kütləvi şifrə yeniləmə (Password Reset) cəhdləri.",
+  "search": "index=web host=\"millibluesec.online\" uri=\"*/password_reset*\" method=POST | stats count by clientip | search count > 5",
+  "cron_schedule": "* * * * *"
+}
