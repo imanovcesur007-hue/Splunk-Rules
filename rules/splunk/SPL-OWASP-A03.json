@@ -1,8 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A03",
-    "rule_name": "Supply Chain Failures - Vulnerable Component Exploitation",
-    "severity": "Critical",
-    "owasp_id": "A03",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(jndi:(ldap|rmi)://|/package-lock\\.json|/\\.npmrc|/composer\\.lock)\")\n  AND NOT match(uri_path, \"(\\.\\./|\\.\\.%2[Ff])\")\n| eval rule=\"A03\", sev=\"Critical\"\n| table _time, src_ip, uri_path, rule, sev"
-  }
-
+  "name": "OWASP_A03_Injection_Attacks",
+  "description": "SQL Injection və ya Command Injection hücum cəhdləri.",
+  "search": "index=web host=\"millibluesec.online\" (uri_query=\"*UNION*SELECT*\" OR uri_query=\"*DROP*TABLE*\" OR uri_query=\"*<script>*\" OR uri_query=\"*cat /etc/*\") | stats count by clientip, uri, uri_query | search count > 0",
+  "cron_schedule": "* * * * *"
+}
