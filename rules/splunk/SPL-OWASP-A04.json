@@ -5,4 +5,4 @@
     "owasp_id": "A04",
     "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<method>GET|POST) (?<uri_path>[^\\s]+).*?(?<status>\\d{3})\"\n| where match(uri_path, \"/(login|signin|auth)([/?]|$)\")\n  AND method=\"GET\"\n  AND status=\"301\"\n| eval rule=\"A04\", sev=\"Medium\"\n| table _time, src_ip, uri_path, status, rule, sev"
   }
-1
+
