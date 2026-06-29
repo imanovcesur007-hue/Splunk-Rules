@@ -1,8 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A01",
-    "rule_name": "Broken Access Control - Path Traversal",
-    "severity": "High",
-    "owasp_id": "A01",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(\\.\\./|\\.\\.%2[Ff]|/etc/passwd|/etc/shadow|/windows/win\\.ini)\")\n  AND NOT match(uri_path, \"(\\.log$|/var/log/|/.env$|/audit/)\")\n| eval rule=\"A01\", sev=\"High\"\n| table _time, src_ip, uri_path, rule, sev"
-  }
-
+  "name": "OWASP_A01_Broken_Access_Control",
+  "description": "İcazəsiz admin panellərinə və ya həssas qovluqlara giriş cəhdləri.",
+  "search": "index=web host=\"millibluesec.online\" (uri=\"*/admin/*\" OR uri=\"*../../*\" OR uri=\"*/etc/passwd\") status=200 | stats count by clientip, uri | search count > 0",
+  "cron_schedule": "* * * * *"
+}
