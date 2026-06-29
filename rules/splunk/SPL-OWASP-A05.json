@@ -1,10 +1,7 @@
 {
-  "rule_id": "SPL-OWASP-A05",
-  "rule_name": "Injection - SQLi and XSS Signatures",
-  "description": "Detects common SQL injection and Cross-Site Scripting (XSS) payload signatures globally.",
-  "severity": "Critical",
-  "owasp_version": "2025",
-  "owasp_id": "A05",
-  "owasp_name": "Injection",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*UNION SELECT*\" OR \"*OR 1=1*\" OR \"*<script>*\" OR \"*%3Cscript%3E*\" OR \"*WAITFOR DELAY*\")"
-}
+    "rule_id": "SPL-OWASP-A05",
+    "rule_name": "Injection - SQLi and XSS",
+    "severity": "Critical",
+    "owasp_id": "A05",
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(UNION\\s+SELECT|OR\\s+1=1|<script[^>]*>|%3Cscript|WAITFOR\\s+DELAY)\")\n| eval rule=\"A05\", sev=\"Critical\"\n| table _time, src_ip, uri_path, rule, sev"
+  }
