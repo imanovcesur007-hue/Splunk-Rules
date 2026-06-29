@@ -1,62 +1,73 @@
 import os
 import json
-import glob
 import requests
 import urllib3
+from pathlib import Path
 
-# SSL xəbərdarlıqlarını söndürmək üçün (Splunk self-signed sertifikat istifadə edirsə)
+# SSL xəbərdarlıqlarını söndürmək üçün (Self-signed sertifikatlar üçün)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Mühit dəyişənlərindən məlumatları çəkirik
+# Mühit Dəyişənləri (GitHub Secrets-dən gələcək)
 SPLUNK_HOST = os.getenv("SPLUNK_HOST", "https://9.223.115.161:8089")
 SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN")
-RULES_DIR = "rules/splunk"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT = os.getenv("TELEGRAM_CHAT")
 
-headers = {
-    "Authorization": f"Bearer {SPLUNK_TOKEN}"
-}
+# Telegram URL (Splunk webhook-u bu linkə POST atacaq)
+TELEGRAM_WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT}&text=Diqqet!+Yeni+Hucum+Detect+Olundu:+{millibluesec.online}"
 
-def get_existing_searches():
-    url = f"{SPLUNK_HOST}/services/saved/searches?output_mode=json"
-    response = requests.get(url, headers=headers, verify=False)
-    if response.status_code == 200:
-        return [entry['name'] for entry in response.json().get('entry', [])]
-    return []
-
-def deploy_rule(filepath, existing_searches):
-    with open(filepath, 'r', encoding='utf-8') as file:
-        rule_data = json.load(file)
-    
-    rule_name = rule_data["name"]
-    payload = {
-        "search": rule_data["search"],
-        "cron_schedule": rule_data["cron_schedule"],
-        "is_scheduled": "1",
-        "description": rule_data["description"],
-        "action.webhook": "1", # Webhook aktivləşdirilir
-        "alert_type": "always",
-        "alert.severity": rule_data["severity_level"]
+def deploy_rules():
+    headers = {
+        "Authorization": f"Bearer {SPLUNK_TOKEN}",
+        "Content-Type": "application/x-www-form-urlencoded"
     }
+    
+    rules_dir = Path("rules/splunk")
+    for rule_file in rules_dir.glob("*.json"):
+        with open(rule_file, "r", encoding="utf-8") as f:
+            rule_data = json.load(f)
+            
+        rule_name = rule_data["name"]
+        
+        # Splunk REST API üçün payload
+        payload = {
+            "name": rule_name,
+            "search": rule_data["search"],
+            "cron_schedule": rule_data["cron_schedule"], # * * * * * (Hər dəqiqə)
+            "is_scheduled": "1",
+            "dispatch.earliest_time": "-1m", # Son 1 dəqiqə logları
+            "dispatch.latest_time": "now",
+            "alert_type": "number of events",
+            "alert_comparator": "greater than",
+            "alert_threshold": "0",
+            "description": rule_data["description"],
+            "action.webhook": "1",
+            "action.webhook.param.url": TELEGRAM_WEBHOOK_URL
+        }
 
-    if rule_name in existing_searches:
-        # Update mövcud rule
-        url = f"{SPLUNK_HOST}/services/saved/searches/{rule_name}"
-        response = requests.post(url, headers=headers, data=payload, verify=False)
-        print(f"[{response.status_code}] UPDATED: {rule_name}")
-    else:
-        # Create yeni rule
-        payload["name"] = rule_name
+        print(f"Deploying rule: {rule_name}...")
+        
+        # Qaydanın mövcud olub-olmadığını yoxlayıb, yeniləyirik və ya yaradırıq
         url = f"{SPLUNK_HOST}/services/saved/searches"
+        
+        # Əvvəl yaratmağa cəhd edirik
         response = requests.post(url, headers=headers, data=payload, verify=False)
-        print(f"[{response.status_code}] CREATED: {rule_name}")
+        
+        if response.status_code == 201:
+            print(f"[{rule_name}] Ugurla yaradildi!")
+        elif response.status_code == 409: # 409 Conflict o deməkdir ki, qayda artıq var. Update edirik.
+            print(f"[{rule_name}] Artiq movcuddu. Update edilir...")
+            update_url = f"{url}/{rule_name}"
+            update_response = requests.post(update_url, headers=headers, data=payload, verify=False)
+            if update_response.status_code == 200:
+                print(f"[{rule_name}] Ugurla update olundu!")
+            else:
+                print(f"Update zamani xeta [{rule_name}]: {update_response.text}")
+        else:
+            print(f"Xeta bas verdi [{rule_name}]: {response.status_code} - {response.text}")
 
 if __name__ == "__main__":
     if not SPLUNK_TOKEN:
-        print("XƏTA: SPLUNK_TOKEN tapılmadı!")
+        print("XETA: SPLUNK_TOKEN teyin edilmeyib!")
         exit(1)
-        
-    existing_searches = get_existing_searches()
-    rule_files = glob.glob(f"{RULES_DIR}/*.json")
-    
-    for file_path in rule_files:
-        deploy_rule(file_path, existing_searches)
+    deploy_rules()
