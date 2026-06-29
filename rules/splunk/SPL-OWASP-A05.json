@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A05_Security_Misconfiguration",
-  "description": "Gizli mühit fayllarına (.env) və konfiqurasiya detallarına çıxış.",
-  "search": "index=web host=\"millibluesec.online\" (uri=\"*/.env\" OR uri=\"*/.git/*\" OR uri=\"*phpinfo.php\") | stats count by clientip, uri | search count > 0",
-  "cron_schedule": "* * * * *"
-}
