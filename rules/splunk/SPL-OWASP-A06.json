@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A06_Vulnerable_Components",
-  "description": "Köhnəlmiş və ya məlum CVE (Məsələn Log4j, Spring4Shell) zəiflikləri axtarışı.",
-  "search": "index=web host=\"millibluesec.online\" (useragent=\"*jndi:ldap*\" OR uri=\"*CVE-202*\") | stats count by clientip, useragent | search count > 0",
-  "cron_schedule": "* * * * *"
-}
