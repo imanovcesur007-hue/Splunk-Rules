@@ -6,90 +6,96 @@ import urllib.parse
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# --- SPLUNK KONFİQURASİYASI (YENİ SERVER) ---
-SPLUNK_HOST = "https://9.223.115.161:8089"
-SPLUNK_TOKEN = "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIjoiSFM1MTIiLCJ2ZXIiOiJ2MiIsInR0eXAiOiJzdGF0aWMifQ.eyJpc3MiOiJtaWxsaXNlYyBmcm9tIHNwbHVua3NlcnZlciIsInN1YiI6Im1pbGxpc2VjIiwiYXVkIjoiR2l0aHViX2FwaSIsImlkcCI6IlNwbHVuayIsImp0aSI6Ijc2ZTkzZWM4M2Q3MGVhOGE1ZTU0MTRmOWI4YTQ1OWIwMTEwM2U4MGJkN2RlNGRjNmNiZmVlNmM4MjgxN2Q1NzkiLCJpYXQiOjE3ODIyMTc1NzAsImV4cCI6MTc4NDgwOTU3MCwibmJyIjoxNzgyMjE3NTcwfQ.fqp4Kcv9nuy_XSl0IyS6QcklHvgf17fOhPT4uOYp2P3cqPYo6VXRi_aobA3u15nUZs6KIMg517T0s-5yKN-wPw"
-APP_CONTEXT = "search"
+# --- KONFİQURASİYA ---
+SPLUNK_HOST     = "https://9.223.115.161:8089"
+SPLUNK_TOKEN    = "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIjoiSFM1MTIiLCJ2ZXIiOiJ2MiIsInR0eXAiOiJzdGF0aWMifQ.eyJpc3MiOiJtaWxsaXNlYyBmcm9tIHNwbHVua3NlcnZlciIsInN1YiI6Im1pbGxpc2VjIiwiYXVkIjoiR2l0aHViX2FwaSIsImlkcCI6IlNwbHVuayIsImp0aSI6Ijc2ZTkzZWM4M2Q3MGVhOGE1ZTU0MTRmOWI4YTQ1OWIwMTEwM2U4MGJkN2RlNGRjNmNiZmVlNmM4MjgxN2Q1NzkiLCJpYXQiOjE3ODIyMTc1NzAsImV4cCI6MTc4NDgwOTU3MCwibmJyIjoxNzgyMjE3NTcwfQ.fqp4Kcv9nuy_XSl0IyS6QcklHvgf17fOhPT4uOYp2P3cqPYo6VXRi_aobA3u15nUZs6KIMg517T0s-5yKN-wPw"
+TELEGRAM_TOKEN  = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
+TELEGRAM_CHAT   = "-1004353279755"
+APP_CONTEXT     = "search"
+RULES_DIR       = "rules/splunk/"
+
 API_ENDPOINT = f"{SPLUNK_HOST}/servicesNS/nobody/{APP_CONTEXT}/saved/searches"
-
-# --- TELEGRAM KONFİQURASİYASI ---
-TELEGRAM_BOT_TOKEN = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
-TELEGRAM_CHAT_ID = "-1004353279755"
-
-headers = {
+HEADERS = {
     "Authorization": f"Bearer {SPLUNK_TOKEN}",
     "Content-Type": "application/x-www-form-urlencoded"
 }
 
-RULES_DIR = "rules/splunk/"
 
-def deploy_rule_to_splunk(rule_data):
-    rule_name = rule_data["rule_name"]
-    
-    # Köhnə və yeni JSON formatlarını qəzaya uğramadan dəstəkləmək üçün Fallback mexanizmi
-    owasp_id = rule_data.get("owasp_id")
-    owasp_version = rule_data.get("owasp_version")
-    owasp_name = rule_data.get("owasp_name")
-    
-    if owasp_id and owasp_version and owasp_name:
-        owasp_details = f"{owasp_id}:{owasp_version}-{owasp_name}"
-    else:
-        # Əgər yeni sahələr yoxdursa, köhnə owasp_category sahəsinə baxır, o da yoxdursa "N/A" yazır
-        owasp_details = rule_data.get("owasp_category", "N/A")
-    
-    telegram_message = f"🚨 SOC ALERT: YENİ TƏHDİD AŞKARLANDI! 🚨\n\nQayda: {rule_name}\nKateqoriya: {owasp_details}\nCiddiyyət: {rule_data['severity']}\n\nTəcili Splunk panelinə daxil olub analiz edin!"
-    encoded_message = urllib.parse.quote(telegram_message)
-    TELEGRAM_WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={encoded_message}"
-    
+def build_telegram_url(rule):
+    msg = (
+        f"🚨 SOC ALERT: YENİ TƏHDİD AŞKARLANDI! 🚨\n\n"
+        f"Qayda: {rule['rule_name']}\n"
+        f"OWASP: {rule['owasp_id']}\n"
+        f"Ciddiyyət: {rule['severity']}\n\n"
+        f"Təcili Splunk panelinə daxil olub analiz edin!"
+    )
+    return (
+        f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        f"?chat_id={TELEGRAM_CHAT}&text={urllib.parse.quote(msg)}"
+    )
+
+
+def deploy(rule):
+    name = rule["rule_name"]
+    print(f"Emal edilir: {rule.get('rule_id', '?')} - {name}...")
+
     payload = {
-        "search": rule_data["search_query"],
-        "description": f"{rule_data['description']} | OWASP Category: {owasp_details} | Severity: {rule_data['severity']}",
-        "disabled": "0",
-        "is_scheduled": "1",
-        "cron_schedule": "* * * * *", 
-        "dispatch.earliest_time": "0",
-        "dispatch.latest_time": "now",
-        "alert_type": "number of events",
-        "alert_comparator": "greater than",
-        "alert_threshold": "0",
-        "actions": "webhook",
-        "action.webhook": "1",
-        "action.webhook.param.url": TELEGRAM_WEBHOOK_URL
+        "search":                   rule["search_query"],
+        "description":              f"OWASP {rule['owasp_id']} | Severity: {rule['severity']}",
+        "disabled":                 "0",
+        "is_scheduled":             "1",
+        "cron_schedule":            "* * * * *",
+        "dispatch.earliest_time":   "0",
+        "dispatch.latest_time":     "now",
+        "alert_type":               "number of events",
+        "alert_comparator":         "greater than",
+        "alert_threshold":          "0",
+        "actions":                  "webhook",
+        "action.webhook":           "1",
+        "action.webhook.param.url": build_telegram_url(rule)
     }
 
-    print(f"Emal edilir: {rule_data.get('rule_id', 'UNKNOWN')} - {rule_name}...")
-    
-    create_payload = payload.copy()
-    create_payload["name"] = rule_name
-    
-    response = requests.post(API_ENDPOINT, headers=headers, data=create_payload, verify=False)
+    # Yarat
+    resp = requests.post(API_ENDPOINT, headers=HEADERS,
+                         data={**payload, "name": name}, verify=False)
 
-    if response.status_code == 201:
-        print(f"✅ YARADILDI: '{rule_name}' (Telegram Alert ilə).\n")
-    elif response.status_code == 409:
-        encoded_rule_name = urllib.parse.quote(rule_name)
-        update_endpoint = f"{API_ENDPOINT}/{encoded_rule_name}"
-        update_response = requests.post(update_endpoint, headers=headers, data=payload, verify=False)
-        if update_response.status_code == 200:
-             print(f"🔄 GÜNCƏLLƏNDİ: '{rule_name}' uğurla yeniləndi.\n")
+    if resp.status_code == 201:
+        print(f"✅ YARADILDI: '{name}'\n")
+
+    elif resp.status_code == 409:
+        # Mövcuddur — yenilə
+        url = f"{API_ENDPOINT}/{urllib.parse.quote(name)}"
+        resp2 = requests.post(url, headers=HEADERS, data=payload, verify=False)
+        if resp2.status_code == 200:
+            print(f"🔄 GÜNCƏLLƏNDİ: '{name}'\n")
         else:
-             print(f"❌ XƏTA (Update): {update_response.status_code} - {update_response.text}\n")
+            print(f"❌ XƏTA (update): {resp2.status_code} - {resp2.text}\n")
+
     else:
-        print(f"❌ XƏTA (Create): {response.status_code} - {response.text}\n")
+        print(f"❌ XƏTA (create): {resp.status_code} - {resp.text}\n")
+
 
 def main():
     if not os.path.exists(RULES_DIR):
         print(f"❌ Qovluq tapılmadı: {RULES_DIR}")
         return
-    for filename in os.listdir(RULES_DIR):
-        if filename.endswith(".json"):
-            filepath = os.path.join(RULES_DIR, filename)
-            with open(filepath, 'r', encoding='utf-8') as f:
-                try:
-                    rule_data = json.load(f)
-                    deploy_rule_to_splunk(rule_data)
-                except json.JSONDecodeError:
-                    print(f"❌ XƏTA: {filename} faylı düzgün JSON deyil.")
+
+    for fname in sorted(os.listdir(RULES_DIR)):
+        if not fname.endswith(".json"):
+            continue
+        path = os.path.join(RULES_DIR, fname)
+        with open(path, encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                print(f"❌ Düzgün JSON deyil: {fname}")
+                continue
+
+        # Array və ya tək object dəstəyi
+        rules = data if isinstance(data, list) else [data]
+        for rule in rules:
+            deploy(rule)
+
 
 if __name__ == "__main__":
     main()
