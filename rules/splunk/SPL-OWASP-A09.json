@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A09_Logging_Failures",
-  "description": "Hücumçunun logları silmək və ya manipulyasiya etmək cəhdləri.",
-  "search": "index=web host=\"millibluesec.online\" (uri=\"*/clear_logs*\" OR uri=\"*/delete_audit*\") method=POST | stats count by clientip | search count > 0",
-  "cron_schedule": "* * * * *"
-}
