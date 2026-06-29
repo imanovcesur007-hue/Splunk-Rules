@@ -1,7 +1,6 @@
 {
-    "rule_id": "SPL-OWASP-A08",
-    "rule_name": "Data Integrity Failures - Insecure Deserialization",
-    "severity": "Critical",
-    "owasp_id": "A08",
-    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<payload>rO0AB[^\\s]+|O:\\d+:\"|O%3A\\d+%3A|/wEP[A-Za-z0-9+/]+)\"\n| where isnotnull(payload)\n| eval rule=\"A08\", sev=\"Critical\"\n| table _time, src_ip, payload, rule, sev"
-  }
+  "name": "OWASP_A08_Integrity_Failures",
+  "description": "Təhlükəli deserialization cəhdləri (Base64 payloadlar).",
+  "search": "index=web host=\"millibluesec.online\" (uri_query=\"*O:8:*\" OR uri_query=\"*base64_decode*\") | stats count by clientip | search count > 0",
+  "cron_schedule": "* * * * *"
+}
