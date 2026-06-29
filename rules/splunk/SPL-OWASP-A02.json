@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A02_Cryptographic_Failures",
-  "description": "Zəif şifrələmə protokollarının (TLSv1.0, HTTP) istifadəsi cəhdləri.",
-  "search": "index=web host=\"millibluesec.online\" (protocol=\"HTTP\" OR ssl_version=\"TLSv1.0\" OR ssl_version=\"TLSv1.1\") | stats count by clientip, uri | search count > 0",
-  "cron_schedule": "* * * * *"
-}
