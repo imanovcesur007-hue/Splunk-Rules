@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A10_SSRF",
-  "description": "Server vasitəsilə daxili şəbəkəyə (Internal IP) edilən SSRF cəhdləri.",
-  "search": "index=web host=\"millibluesec.online\" (uri_query=\"*127.0.0.1*\" OR uri_query=\"*169.254.169.254*\" OR uri_query=\"*localhost*\") | stats count by clientip, uri_query | search count > 0",
-  "cron_schedule": "* * * * *"
-}
