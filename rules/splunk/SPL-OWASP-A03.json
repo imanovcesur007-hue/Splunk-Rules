@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A03_Injection_Attacks",
-  "description": "SQL Injection və ya Command Injection hücum cəhdləri.",
-  "search": "index=web host=\"millibluesec.online\" (uri_query=\"*UNION*SELECT*\" OR uri_query=\"*DROP*TABLE*\" OR uri_query=\"*<script>*\" OR uri_query=\"*cat /etc/*\") | stats count by clientip, uri, uri_query | search count > 0",
-  "cron_schedule": "* * * * *"
-}
