@@ -1,10 +1,7 @@
 {
-  "rule_id": "SPL-OWASP-A03",
-  "rule_name": "Supply Chain Failures - Vulnerable Component Signatures",
-  "description": "Detects exploitation attempts of known supply chain vulnerabilities (e.g., Log4Shell) and exposed package manifests.",
-  "severity": "Critical",
-  "owasp_version": "2025",
-  "owasp_id": "A03",
-  "owasp_name": "Software Supply Chain Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*jndi:ldap*\" OR \"*jndi:rmi*\" OR \"*/package-lock.json*\" OR \"*/.npmrc*\" OR \"*composer.lock*\") NOT (\"*../*\" OR \"*..%2f*\")"
-}
+    "rule_id": "SPL-OWASP-A03",
+    "rule_name": "Supply Chain Failures - Vulnerable Component Exploitation",
+    "severity": "Critical",
+    "owasp_id": "A03",
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(jndi:(ldap|rmi)://|/package-lock\\.json|/\\.npmrc|/composer\\.lock)\")\n  AND NOT match(uri_path, \"(\\.\\./|\\.\\.%2[Ff])\")\n| eval rule=\"A03\", sev=\"Critical\"\n| table _time, src_ip, uri_path, rule, sev"
+  }
