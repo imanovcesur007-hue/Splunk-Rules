@@ -3,5 +3,5 @@
     "rule_name": "Broken Access Control - Path Traversal",
     "severity": "High",
     "owasp_id": "A01",
-    "search_query": "index=main sourscetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(\\.\\./|\\.\\.%2[Ff]|/etc/passwd|/etc/shadow|/windows/win\\.ini)\")\n  AND NOT match(uri_path, \"(\\.log$|/var/log/|/.env$|/audit/)\")\n| eval rule=\"A01\", sev=\"High\"\n| table _time, src_ip, uri_path, rule, sev"
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<uri_path>[^\\s]+)\"\n| where match(uri_path, \"(\\.\\./|\\.\\.%2[Ff]|/etc/passwd|/etc/shadow|/windows/win\\.ini)\")\n  AND NOT match(uri_path, \"(\\.log$|/var/log/|/.env$|/audit/)\")\n| eval rule=\"A01\", sev=\"High\"\n| table _time, src_ip, uri_path, rule, sev"
   }
