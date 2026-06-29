@@ -1,4 +1,4 @@
-asdimport os
+import os
 import glob
 import requests
 import logging
