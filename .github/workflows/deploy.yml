@@ -1,4 +1,4 @@
-name: Deploy Rules to Splunk
+name: Deploy Detection Rules to Splunk API
 
 on:
   push:
@@ -7,23 +7,24 @@ on:
     paths:
       - 'rules/splunk/**'
       - 'deploy_to_splunk.py'
-  workflow_dispatch: 
 
 jobs:
-  deploy:
+  deploy-rules:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: pip install requests urllib3
+        run: pip install requests
 
-      - name: Run Splunk Deployment Script
+      - name: Run Deploy Script
+        env:
+          SPLUNK_HOST: ${{ secrets.SPLUNK_HOST }}
+          SPLUNK_TOKEN: ${{ secrets.SPLUNK_TOKEN }}
         run: python deploy_to_splunk.py
