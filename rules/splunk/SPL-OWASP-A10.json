@@ -1,10 +1,7 @@
 {
-  "rule_id": "SPL-OWASP-A10",
-  "rule_name": "Exception Handling - Verbose Error Leaks",
-  "description": "Detects instances where the application leaks sensitive internal stack traces, database errors, or unhandled exceptions.",
-  "severity": "Medium",
-  "owasp_version": "2025",
-  "owasp_id": "A10",
-  "owasp_name": "Mishandling of Exceptional Conditions",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*Stack trace:*\" OR \"*java.lang.*Exception*\" OR \"*mysql_fetch_*\" OR \"*Syntax error in SQL*\" OR \"*Uncaught TypeError*\")"
-}
+    "rule_id": "SPL-OWASP-A10",
+    "rule_name": "Exception Handling - Verbose Error Leakage",
+    "severity": "Medium",
+    "owasp_id": "A10",
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<err_sig>Stack trace:|java\\.lang\\.\\w+Exception|mysql_fetch_\\w+|Syntax error in SQL|Uncaught TypeError)\"\n| where isnotnull(err_sig)\n| eval rule=\"A10\", sev=\"Medium\"\n| table _time, src_ip, err_sig, rule, sev"
+  }
