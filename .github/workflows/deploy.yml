@@ -1,37 +1,39 @@
-name: Deploy Detection Rules to Splunk SİEM
+name: Deploy Detection Rules to Splunk
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'rules/splunk/*.json'
+      - 'rules/splunk/**.json'
       - 'deploy_to_splunk.py'
-  workflow_dispatch: # Manual tetikləmə üçün
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch: # Test məqsədilə manual işə salmağa imkan verir
 
 jobs:
-  deploy-rules:
+  deploy-splunk-rules:
+    name: Sync Rules with Splunk Enterprise API
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Repozitoriyanı klonla
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Python mühitini qur
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
-      - name: Asılılıqları yüklə (Requests)
+          cache: 'pip'
+
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests urllib3
+          # requirements.txt faylı varsa oxuyur, yoxdursa birbaşa requests yükləyir
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install requests; fi
 
-      - name: Splunk-a Rule-ları Göndər
+      - name: Execute Splunk Deployment Script
         env:
           SPLUNK_HOST: "https://9.223.115.161:8089"
           SPLUNK_TOKEN: ${{ secrets.SPLUNK_TOKEN }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT: ${{ secrets.TELEGRAM_CHAT }}
         run: |
           python deploy_to_splunk.py
