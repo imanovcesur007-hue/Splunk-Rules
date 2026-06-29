@@ -1,10 +1,7 @@
 {
-  "rule_id": "SPL-OWASP-A08",
-  "rule_name": "Data Integrity Failures - Insecure Deserialization",
-  "description": "Detects serialization signatures across Java, PHP, and .NET to prevent object injection.",
-  "severity": "Critical",
-  "owasp_version": "2025",
-  "owasp_id": "A08",
-  "owasp_name": "Software or Data Integrity Failures",
-  "search_query": "index=main sourcetype=_json _index_earliest=-1m (\"*rO0AB*\" OR \"*O:*:*\" OR \"*O%3A*%3A*\" OR \"*/wEP*\")"
-}
+    "rule_id": "SPL-OWASP-A08",
+    "rule_name": "Data Integrity Failures - Insecure Deserialization",
+    "severity": "Critical",
+    "owasp_id": "A08",
+    "search_query": "index=main sourcetype=_json _index_earliest=-1m\n| rex field=_raw \"(?<payload>rO0AB[^\\s]+|O:\\d+:\"|O%3A\\d+%3A|/wEP[A-Za-z0-9+/]+)\"\n| where isnotnull(payload)\n| eval rule=\"A08\", sev=\"Critical\"\n| table _time, src_ip, payload, rule, sev"
+  }
