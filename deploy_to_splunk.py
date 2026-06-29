@@ -40,13 +40,86 @@ def get_existing_rules():
 
 def read_local_rules():
     local_rules = {}
-    search_path = "rules/splunk/*.conf"
-    # Debug üçün axtarış yolunu çap edirik
-    logger.info(f"Axtarış aparılan qovluq: {os.getcwd()}")
+    # Skriptin olduğu yeri əsas götürərək tam (absolute) yol yaradırıq
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    search_path = os.path.join(base_path, "rules", "splunk", "*.conf")
+    
+    logger.info(f"Axtarış yolu: {search_path}")
     files = glob.glob(search_path)
-    logger.info(f"Tapılan fayllar: {files}") # <--- Bu sətir problemin kökünü açacaq
+    logger.info(f"Tapılan fayllar: {files}")
     
     if not files:
-        logger.warning(f"Heç bir fayl tapılmadı! Axtarış yolu: {search_path}")
+        logger.warning("Heç bir fayl tapılmadı!")
         return local_rules
-    # ... qalan kod olduğu kimi qalır
+    
+    for file_path in files:
+        rule_name = os.path.basename(file_path).replace(".conf", "")
+        with open(file_path, "r", encoding="utf-8") as f:
+            spl_query = f.read().strip()
+        
+        if not spl_query:
+            continue
+
+        payload = {
+            "name": rule_name,
+            "search": spl_query,
+            "cron_schedule": "* * * * *",
+            "is_scheduled": "1",
+            "dispatch.earliest_time": "-1m@m",
+            "dispatch.latest_time": "@m",
+            "alert_type": "number of events",
+            "alert_comparator": "greater than",
+            "alert_threshold": "0",
+            "alert.severity": "4",
+            "alert.suppress": "1",
+            "alert.suppress.period": "5m",
+            "alert.suppress.fields": "src_ip",
+            "action.webhook": "1",
+            "action.webhook.param.url": WEBHOOK_URL
+        }
+        local_rules[rule_name] = payload
+    return local_rules
+
+
+def create_or_update_rule(rule_name, payload, exists):
+    data = payload.copy()
+    if exists and "name" in data:
+        del data["name"]
+
+    try:
+        url = f"{API_BASE_URL}/{rule_name}" if exists else API_BASE_URL
+        res = requests.post(url, headers=HEADERS, data=data, verify=False, timeout=30)
+        if res.status_code in (200, 201):
+            logger.info(f"UĞURLU: {rule_name} {'yeniləndi' if exists else 'yaradıldı'}.")
+        else:
+            logger.error(f"XƏTA: {rule_name} emal edilmədi! Status: {res.status_code} - {res.text}")
+    except Exception as e:
+        logger.error(f"XƏTA: Qayda {rule_name} işlənərkən problem yaşandı: {e}")
+
+
+def delete_rule(rule_name):
+    try:
+        res = requests.delete(f"{API_BASE_URL}/{rule_name}", headers=HEADERS, verify=False, timeout=30)
+        if res.status_code == 200:
+            logger.info(f"SİLİNDİ: {rule_name}")
+    except Exception as e:
+        logger.error(f"XƏTA: {rule_name} silinərkən problem yaşandı: {e}")
+
+
+def main():
+    logger.info("==== Splunk SIEM Detection Rules Deployment Process Started ====")
+    existing_rules = get_existing_rules()
+    local_rules = read_local_rules()
+
+    for rule_name, payload in local_rules.items():
+        create_or_update_rule(rule_name, payload, rule_name in existing_rules)
+
+    for rule_name in existing_rules:
+        if rule_name not in local_rules:
+            delete_rule(rule_name)
+            
+    logger.info("==== Deployment Process Successfully Completed ====")
+
+
+if __name__ == "__main__":
+    main()
