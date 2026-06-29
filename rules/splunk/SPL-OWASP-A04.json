@@ -1,6 +1,0 @@
-{
-  "name": "OWASP_A04_Insecure_Design",
-  "description": "Məntiqi zəifliklərdən istifadə edərək eyni IP-dən kütləvi şifrə yeniləmə (Password Reset) cəhdləri.",
-  "search": "index=web host=\"millibluesec.online\" uri=\"*/password_reset*\" method=POST | stats count by clientip | search count > 5",
-  "cron_schedule": "* * * * *"
-}
