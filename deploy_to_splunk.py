@@ -15,11 +15,6 @@ SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN", "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIj
 APP_CONTEXT = "search"
 OWNER = "nobody"
 
-TELEGRAM_TOKEN = "8875580959:AAEOvW7ZPzygkQwxc2vfsJT-FZt3P5jwCDc"
-TELEGRAM_CHAT_ID = "-1004353279755"
-
-WEBHOOK_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&parse_mode=HTML&text=%F0%9F%9A%A8%20%3Cb%3EMilliBlueSec%20SIEM%20Alert%3C%2Fb%3E%20%F0%9F%9A%A8%0A%0A%3Cb%3EQayda%3A%3C%2Fb%3E%20%24name%24%0A%3Cb%3EH%C3%BCcum%20Vaxt%C4%B1%3A%3C%2Fb%3E%20%24result._time%24%0A%0A%E2%9A%A0%EF%B8%8F%20%3Cb%3ET%C9%99cili%20Splunk%20panelin%C9%99%20daxil%20olub%20loglar%C4%B1%20analiz%20edin%21%3C%2Fb%3E"
-
 if not SPLUNK_TOKEN:
     logger.error("CRITICAL: SPLUNK_TOKEN tapılmadı! Deployment dayandırılır.")
     sys.exit(1)
@@ -43,7 +38,7 @@ def read_local_rules():
     local_rules = {}
     base_path = os.path.dirname(os.path.abspath(__file__))
     
-    # DÜZƏLDİLDİ: Fayllar rules/splunk/ qovluğundadır
+    # Fayllar rules/splunk/ qovluğundan oxunur
     search_path = os.path.join(base_path, "rules", "splunk", "*.conf")
     
     logger.info(f"Axtarış yolu: {search_path}")
@@ -74,9 +69,8 @@ def read_local_rules():
             "alert_threshold": "0",
             "alert.severity": "4",
             "alert.suppress": "1",
-            "alert.suppress.period": "5m",
-            "action.webhook": "1",
-            "action.webhook.param.url": WEBHOOK_URL
+            "alert.suppress.period": "5m"
+            # QEYD: Telegram webhook parametrləri buradan tamamilə silindi
         }
         local_rules[rule_name] = payload
     return local_rules
