@@ -24,11 +24,19 @@ API_BASE_URL = f"{SPLUNK_HOST}/servicesNS/{OWNER}/{APP_CONTEXT}/saved/searches"
 
 
 def get_existing_rules():
-    params = {"output_mode": "json", "count": 0, "search": "name=*_Detection"}
+    # Bütün axtarışları gətiririk, lakin Python içində filtrləyirik
+    params = {"output_mode": "json", "count": 0}
     try:
         res = requests.get(API_BASE_URL, headers=HEADERS, params=params, verify=False, timeout=30)
         res.raise_for_status()
-        return {entry["name"]: entry for entry in res.json().get("entry", [])}
+        
+        # Yalnız bizə aid olan (_Detection və ya _Discovery ilə bitən) qaydaları seçirik ki, 
+        # Splunk-ın digər vacib/sistem alertlərini təsadüfən silməyək.
+        return {
+            entry["name"]: entry 
+            for entry in res.json().get("entry", []) 
+            if entry["name"].endswith("_Detection") or entry["name"].endswith("_Discovery")
+        }
     except requests.exceptions.RequestException as e:
         logger.error(f"Splunk API xətası: {e}")
         sys.exit(1)
@@ -38,7 +46,6 @@ def read_local_rules():
     local_rules = {}
     base_path = os.path.dirname(os.path.abspath(__file__))
     
-    # Fayllar rules/splunk/ qovluğundan oxunur
     search_path = os.path.join(base_path, "rules", "splunk", "*.conf")
     
     logger.info(f"Axtarış yolu: {search_path}")
@@ -70,7 +77,6 @@ def read_local_rules():
             "alert.severity": "4",
             "alert.suppress": "1",
             "alert.suppress.period": "5m"
-            # QEYD: Telegram webhook parametrləri buradan tamamilə silindi
         }
         local_rules[rule_name] = payload
     return local_rules
