@@ -10,8 +10,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
 logger = logging.getLogger(__name__)
 
-SPLUNK_HOST = os.getenv("SPLUNK_HOST", "https://9.223.115.161:8089")
-SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN", "eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYWxnIjoiSFM1MTIiLCJ2ZXIiOiJ2MiIsInR0eXAiOiJzdGF0aWMifQ.eyJpc3MiOiJtaWxsaXNlYyBmcm9tIHNwbHVua3NlcnZlciIsInN1YiI6Im1pbGxpc2VjIiwiYXVkIjoiR2l0aHViX2FwaSIsImlkcCI6IlNwbHVuayIsImp0aSI6Ijc2ZTkzZWM4M2Q3MGVhOGE1ZTU0MTRmOWI4YTQ1OWIwMTEwM2U4MGJkN2RlNGRjNmNiZmVlNmM4MjgxN2Q1NzkiLCJpYXQiOjE3ODIyMTc1NzAsImV4cCI6MTc4NDgwOTU3MCwibmJyIjoxNzgyMjE3NTcwfQ.fqp4Kcv9nuy_XSl0IyS6QcklHvgf17fOhPT4uOYp2P3cqPYo6VXRi_aobA3u15nUZs6KIMg517T0s-5yKN-wPw")
+SPLUNK_HOST = os.getenv("SPLUNK_HOST")
+SPLUNK_TOKEN = os.getenv("SPLUNK_TOKEN")
 APP_CONTEXT = "search"
 OWNER = "nobody"
 
